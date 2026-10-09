@@ -70,7 +70,7 @@ make -C "$work" >"$work/build.log" 2>&1 || {
 	tail -20 "$work/build.log" >&2
 	die "the build failed"
 }
-strings "$work/hyprbars.so" | grep -qx "$commit" || die "the build doesn't match the installed Hyprland"
+strings "$work/hyprbars.so" | grep -x "$commit" >/dev/null || die "the build doesn't match the installed Hyprland"
 
 install -d -m 755 "$dest"
 install -m 755 "$work/hyprbars.so" "$dest/hyprbars.so.new"

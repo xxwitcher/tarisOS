@@ -23,8 +23,8 @@ need, and every fix Apple Silicon hardware needs on Linux. Nothing runs unless i
 the machine stays quiet, cool and long-lasting on battery.
 
 > [!NOTE]
-> TarisOS hasn't had its first public release yet. The install command below works once the first
-> image is published; until then you can [build the image yourself](#building-tarisos).
+> TarisOS 1.0.0 is the first release and is still being tested. Back up anything important on your
+> Mac before installing it.
 
 ## Contents
 

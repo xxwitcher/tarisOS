@@ -60,10 +60,18 @@ ExecStart=
 ExecStart=systemd-firstboot
 CONF
 
+# m1n1's boot image on the EFI partition (m1n1, the Macs' device trees and U-Boot: what the Mac
+# starts), made now that the kernel and its device trees are in. Its pacman hook ran when m1n1 was
+# installed, before the kernel, and couldn't.
+rm -f /boot/efi/m1n1/boot.bin.new
+update-m1n1 /boot/efi/m1n1/boot.bin
+[[ $(stat -c %s /boot/efi/m1n1/boot.bin) -gt $(stat -c %s /usr/lib/asahi-boot/m1n1.bin) ]] ||
+	{ echo "m1n1's boot image has no device trees or U-Boot in it" >&2; exit 1; }
+
 # The initramfs and its settings as they are now; one without the asahi hook (Apple Silicon's
 # storage and firmware) wouldn't boot
 mkinitcpio -P
 grep -Eq '^HOOKS=\(.*\basahi\b' /etc/mkinitcpio.conf || { echo "mkinitcpio.conf has no asahi hook" >&2; exit 1; }
 for image in /boot/initramfs-*.img; do
-	lsinitcpio "$image" | grep -q 'hooks/asahi$' || { echo "$image has no asahi hook" >&2; exit 1; }
+	lsinitcpio "$image" | grep 'hooks/asahi$' >/dev/null || { echo "$image has no asahi hook" >&2; exit 1; }
 done

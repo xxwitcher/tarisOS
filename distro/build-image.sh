@@ -86,11 +86,22 @@ init() {
 	mount --bind "$repo" "$root/taris-repo"
 }
 
+# Mounts a setup script left inside the root (a pacman hook that failed half way can leave one,
+# and the next run of that hook then fails on it), but not the build's own
+clean_root_mounts() {
+	local target
+	grep -o " ${root}/[^ ]*" /proc/mounts | sed 's/^ //' | sort -r | while read -r target; do
+		case $target in "$root/taris-repo" | "$root/var/cache/pacman/pkg") continue ;; esac
+		umount "$target" 2>/dev/null || umount -l "$target" 2>/dev/null || true
+	done
+}
+
 run_scripts() {
 	local script
 	for script in "$here"/image/scripts/*.sh; do
 		echo "## ${script##*/}"
 		arch-chroot "$root" /bin/bash <"$script"
+		clean_root_mounts
 	done
 }
 
@@ -157,7 +168,12 @@ make_image() {
 
 	echo "## The EFI system partition's files..."
 	cp "$root/boot/grub/arm64-efi/core.efi" "$img/esp/EFI/BOOT/BOOTAA64.EFI"
-	cp -r "$root/boot/efi/m1n1" "$img/esp/"
+	mkdir -p "$img/esp/m1n1"
+	cp "$root/boot/efi/m1n1/boot.bin" "$img/esp/m1n1/boot.bin"
+	# (What the Mac starts: m1n1 with the device trees and U-Boot, then GRUB)
+	[[ -s $img/esp/EFI/BOOT/BOOTAA64.EFI ]] || die "GRUB's EFI file is missing"
+	[[ $(stat -c %s "$img/esp/m1n1/boot.bin") -gt $(stat -c %s "$root/usr/lib/asahi-boot/m1n1.bin") ]] ||
+		die "m1n1's boot image is incomplete"
 
 	echo "## Zipping..."
 	(cd "$img" && zip -q -9 -r "../$name.zip" -- *)
