@@ -115,7 +115,9 @@ build_in() {
 				[[ $file == *.sig ]] || built+=("$file")
 			done
 			trust_key
-			sudo pacman -U --needed --noconfirm "${built[@]}"
+			# Even at the version installed already: what's built next has to be built against
+			# exactly what ships (a same-version build from elsewhere can differ: libcava.so.2)
+			sudo pacman -U --noconfirm "${built[@]}"
 		fi
 	done
 }

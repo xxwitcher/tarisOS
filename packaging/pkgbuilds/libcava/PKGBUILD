@@ -5,7 +5,7 @@
 
 pkgname=libcava
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc='Fork to provide cava as a shared library, e.g. used by waybar. Cava is not provided as executable.'
 arch=('x86_64' 'aarch64')
 url='https://github.com/LukashonakV/cava'
@@ -37,6 +37,13 @@ options=(!lto)
 
 build() {
     cd "cava-${pkgver}"
+
+    # meson.build names the library after `git describe --tags`, and the tarball has no .git, so
+    # git would find the repository this PKGBUILD is in and take its tag (libcava.so.2 from a v2.x
+    # tag): git stops at $srcdir, and the library is this version's (libcava.so.1). Configured
+    # afresh each time: a build folder left from an earlier build keeps the name it was given.
+    export GIT_CEILING_DIRECTORIES="$srcdir"
+    rm -rf build
 
     meson setup \
           -Dcava_font=false \

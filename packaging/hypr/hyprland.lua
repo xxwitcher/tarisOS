@@ -71,7 +71,7 @@ hl.config({
     repeat_rate = 40,
     repeat_delay = 250,
     follow_mouse = 1,
-    touchpad = { natural_scroll = true, ["tap-to-click"] = true, disable_while_typing = true, clickfinger_behavior = true },
+    touchpad = { natural_scroll = true, tap_to_click = true, disable_while_typing = true, clickfinger_behavior = true },
   },
   misc = { disable_hyprland_logo = true, disable_splash_rendering = true },
 })

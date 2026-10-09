@@ -17,10 +17,11 @@ qml=/etc/xdg/quickshell/taris/greeter.qml
 [ -e /var/lib/taris/setup-pending ] && qml=/etc/xdg/quickshell/taris/setup.qml
 
 # It quits by itself once the session is starting; a crash gets two more tries, then a plain text
-# login in a terminal (greetd's own agreety), so nobody is ever locked out by the greeter
+# login in a terminal (greetd's own agreety), so nobody is ever locked out by the greeter. What it
+# says goes to the journal (journalctl -t taris-greeter), which outlasts a restart.
 started=0
 for _ in 1 2 3; do
-	if taris-qs -p "$qml"; then
+	if systemd-cat -t taris-greeter taris-qs -p "$qml"; then
 		started=1
 		break
 	fi

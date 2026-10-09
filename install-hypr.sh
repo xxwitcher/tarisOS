@@ -17,10 +17,13 @@ skel=/etc/skel/.config/hypr/hyprland.lua
 }
 mkdir -p "$conf/hypr"
 [[ -L $conf/taris/hypr-taris.lua ]] && rm -f "$conf/taris/hypr-taris.lua"
-if [[ -L $hypr ]]; then
-  rm -f "$hypr"
-elif [[ -e $hypr ]] && ! cmp -s "$hypr" "$skel"; then
-  mv "$hypr" "$hypr.bak.$(date +%s)"
+if [[ ! -L $hypr ]] && cmp -s "$hypr" "$skel"; then
+  echo "The TarisOS Hyprland config is already at $hypr"
+  exit 0
 fi
-install -m644 "$skel" "$hypr"
+[[ -f $hypr && ! -L $hypr ]] && cp -p "$hypr" "$hypr.bak.$(date +%s)"
+# Replaced in one step: a running Hyprland reloads when its config changes, and a moment without
+# the file leaves it on an error it doesn't recover from (the file it watched is gone)
+install -m644 "$skel" "$hypr.new"
+mv -fT "$hypr.new" "$hypr"
 echo "Installed the TarisOS Hyprland config at $hypr"

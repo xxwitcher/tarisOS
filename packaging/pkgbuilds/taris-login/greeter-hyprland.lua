@@ -28,7 +28,7 @@ hl.config({
   input = {
     kb_layout = layout,
     kb_variant = variant,
-    touchpad = { natural_scroll = true, ["tap-to-click"] = true, clickfinger_behavior = true },
+    touchpad = { natural_scroll = true, tap_to_click = true, clickfinger_behavior = true },
   },
   general = { border_size = 0, gaps_in = 0, gaps_out = 0 },
   decoration = { rounding = 0, shadow = { enabled = false }, blur = { enabled = false } },
