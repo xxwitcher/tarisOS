@@ -61,6 +61,18 @@ install_build_deps() {
 	((${#missing[@]} == 0)) || sudo pacman -S --needed --asdeps "${missing[@]}"
 }
 
+# This machine's pacman trusts the TarisOS key (as TarisOS systems do through taris-keyring), so
+# the signed packages built here install here too (once)
+trusted=0
+trust_key() {
+	((trusted)) && return 0
+	if ! sudo pacman-key --list-keys "$key" >/dev/null 2>&1; then
+		sudo pacman-key --add "$pkgbuilds/taris-keyring/taris.gpg"
+		sudo pacman-key --lsign-key "$key"
+	fi
+	trusted=1
+}
+
 pkgname_of() {
 	bsdtar -xOf "$1" .PKGINFO | sed -n 's/^pkgname = //p'
 }
@@ -102,6 +114,7 @@ build_in() {
 			for file in "$dir"/*.pkg.tar.*; do
 				[[ $file == *.sig ]] || built+=("$file")
 			done
+			trust_key
 			sudo pacman -U --needed --noconfirm "${built[@]}"
 		fi
 	done

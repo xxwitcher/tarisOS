@@ -7,7 +7,7 @@
 
 pkgname=taris-hardware
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc='TarisOS: Apple Silicon hardware support and fixes'
 arch=('aarch64')
 url='https://github.com/xxwitcher/tarisOS'
@@ -20,12 +20,16 @@ depends=(
     'grub'
 
     # Sound: the speakers stay muted without speakersafetyd and asahi-audio's DSP; PipeWire's
-    # PulseAudio and ALSA servers for the apps; rtkit, or the DSP crackles under load
+    # PulseAudio, ALSA and JACK servers for the apps, and its LV2 host for the DSP's plugins (the
+    # other providers of jack and lv2-host are whole audio workstations); rtkit, or the DSP crackles
+    # under load
     'asahi-audio'
     'speakersafetyd'
     'pipewire'
     'pipewire-pulse'
     'pipewire-alsa'
+    'pipewire-jack'
+    'pipewire-audio'
     'wireplumber'
     'rtkit'
     'libpulse'

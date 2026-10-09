@@ -8,6 +8,9 @@
 set -euo pipefail
 
 pacman --noconfirm -S taris-keyring
+# PipeWire's JACK server and LV2 host first: left to choose, pacman takes the first of their other
+# providers (jack2, and Ardour)
+pacman --noconfirm --needed -S pipewire-jack pipewire-audio
 pacman --noconfirm --needed -S taris
 
 apps=(

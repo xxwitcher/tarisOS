@@ -3,12 +3,13 @@
 
 # TarisOS's distribution settings, shared by the repository and image builds (sourced)
 
-# The package repository (pacman's [taris]): a GitHub release's assets
+# The package repository (pacman's [taris]): a GitHub release's assets, in a repo of their own so
+# the source repo's releases stay TarisOS's
 TARIS_REPO=taris
-TARIS_REPO_SERVER=https://github.com/xxwitcher/tarisOS/releases/download/packages
+TARIS_REPO_SERVER=https://github.com/xxwitcher/tarisOS-packages/releases/download/packages
 
 # Where the installer image (the zip) and installer_data.json are published
-TARIS_IMAGE_BASE=https://github.com/xxwitcher/tarisOS/releases/download/image
+TARIS_IMAGE_BASE=https://github.com/xxwitcher/tarisOS-packages/releases/download/image
 TARIS_IMAGE_NAME=tarisos
 
 # Built from the AUR into the repository (fetched when the repository is built; a changed

@@ -125,7 +125,7 @@ You need:
 **1. Run the installer in macOS.** Open Terminal and run:
 
 ```sh
-curl -fsSL https://github.com/xxwitcher/tarisOS/releases/download/image/install.sh | sh
+curl -fsSL https://github.com/xxwitcher/tarisOS-packages/releases/download/image/install.sh | sh
 ```
 
 This starts the Asahi Linux installer with TarisOS as the system to install. It asks for your
@@ -246,12 +246,13 @@ sudo distro/build-image.sh      # the installer image, from that repository
 
 Publishing (`distro/config.sh` sets where):
 
-- **Packages**: upload everything in `distro/out/repo` to the GitHub release `packages`, with
+- **Packages**: upload everything in `distro/out/repo` to the release `packages` of
+  [tarisOS-packages](https://github.com/xxwitcher/tarisOS-packages), with
   `taris.db`, `taris.files` and their `.sig` files as copies of the `.tar.gz` files of the same name
   (release assets can't be links).
 - **Image**: upload `tarisos.zip`, `installer_data.json` and `install.sh` from
-  `distro/out/images` to the release `image` (GitHub takes files under 2 GB). The install command
-  runs that `install.sh`.
+  `distro/out/images` to the release `image` of tarisOS-packages (GitHub takes files under 2 GB).
+  The install command runs that `install.sh`.
 
 ## Working on the shell
 
