@@ -6,12 +6,13 @@
 # any of them can be removed. VS Code and Claude Code aren't in the image: they're installed the
 # first time they're used. CJK fonts and input methods come when a language needs them.
 set -euo pipefail
+. /taris-build/lib.sh
 
-pacman --noconfirm -S taris-keyring
+pacman_retry --noconfirm -S taris-keyring
 # PipeWire's JACK server and LV2 host first: left to choose, pacman takes the first of their other
 # providers (jack2, and Ardour)
-pacman --noconfirm --needed -S pipewire-jack pipewire-audio
-pacman --noconfirm --needed -S taris
+pacman_retry --noconfirm --needed -S pipewire-jack pipewire-audio
+pacman_retry --noconfirm --needed -S taris
 
 apps=(
 	kitty                  # terminal
@@ -32,7 +33,7 @@ apps=(
 	noto-fonts noto-fonts-emoji
 	power-profiles-daemon
 )
-pacman --noconfirm --needed -S "${apps[@]}"
+pacman_retry --noconfirm --needed -S "${apps[@]}"
 
 # Flathub, for every account (system-wide: snapshots and factory reset cover it)
 flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo

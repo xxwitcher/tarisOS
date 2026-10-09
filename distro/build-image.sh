@@ -72,7 +72,12 @@ init() {
 	echo "## Unpacking..."
 	bsdtar -xpf "$dl/base.tar.gz" -C "$root"
 	mount --bind "$root" "$root"
+	# Every Arch Linux ARM mirror while building (pacman moves on to the next when one fails), and
+	# the downloaded packages kept between builds (a build that failed doesn't download them again)
 	cp "$root/etc/pacman.d/mirrorlist" "$root/etc/pacman.d/mirrorlist.orig"
+	sed -i -E 's/^#[[:space:]]*(Server = )/\1/' "$root/etc/pacman.d/mirrorlist"
+	mkdir -p "$work/pkgcache"
+	mount --bind "$work/pkgcache" "$root/var/cache/pacman/pkg"
 	pacstrap -G "$root" asahi-alarm-keyring >/dev/null
 
 	# For the setup scripts: their files, and the repository (pacman's [taris] while building)
@@ -93,6 +98,7 @@ run_scripts() {
 finish_root() {
 	sed -i "s|^Server = file:///taris-repo$|Server = $TARIS_REPO_SERVER|" "$root/etc/pacman.conf"
 	umount "$root/taris-repo"
+	umount "$root/var/cache/pacman/pkg"
 	rm -rf "$root/taris-build" "$root/taris-repo"
 	mv -f "$root/etc/pacman.d/mirrorlist.orig" "$root/etc/pacman.d/mirrorlist"
 	rm -f "$root"/var/cache/pacman/pkg/*
