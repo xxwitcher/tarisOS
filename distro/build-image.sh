@@ -104,6 +104,26 @@ finish_root() {
 	rm -f "$root"/var/cache/pacman/pkg/*
 }
 
+# A command inside the image's root (mounted at $mnt), with /dev, /proc and /sys, which come off
+# again straight after (arch-chroot's extra mounts, EFI variables included, can stay busy and keep
+# the image mounted)
+in_image() {
+	local status=0
+	mount --bind /dev "$mnt/dev"
+	mount -t proc proc "$mnt/proc"
+	mount -t sysfs sys "$mnt/sys"
+	chroot "$mnt" "$@" || status=$?
+	umount "$mnt/sys" "$mnt/proc" "$mnt/dev"
+	return "$status"
+}
+
+# The image's filesystem must be off before it's snapshotted, checked and zipped
+unmount_image() {
+	sync
+	umount "$mnt"
+	! mountpoint -q "$mnt" || die "the image is still mounted at $mnt"
+}
+
 make_image() {
 	local name="$TARIS_IMAGE_NAME" img size
 	img="$images/$name"
@@ -119,19 +139,21 @@ make_image() {
 	mount -o loop,subvolid=5 "$img/root.img" "$mnt"
 	btrfs subvolume create "$mnt/@" >/dev/null
 	btrfs subvolume create "$mnt/@home" >/dev/null
-	umount "$mnt"
+	unmount_image
 
-	mount -o loop,subvol=@,compress=zstd:1 "$img/root.img" "$mnt"
+	mount -o loop,subvol=@ "$img/root.img" "$mnt"
 	rsync -aHAX --exclude /etc/machine-id --exclude '/boot/efi/*' --exclude '/tmp/*' "$root/" "$mnt/"
 	# snapper's settings for the root, and its folder (a subvolume of its own)
-	arch-chroot "$mnt" snapper --no-dbus -c root create-config -t taris /
-	arch-chroot "$mnt" grub-mkconfig -o /boot/grub/grub.cfg
-	umount -R "$mnt"
+	in_image snapper --no-dbus -c root create-config -t taris /
+	in_image grub-mkconfig -o /boot/grub/grub.cfg
+	unmount_image
 
 	# The system as installed, for factory reset
 	mount -o loop,subvolid=5 "$img/root.img" "$mnt"
 	btrfs subvolume snapshot -r "$mnt/@" "$mnt/@factory" >/dev/null
-	umount "$mnt"
+	unmount_image
+	echo "## Checking the filesystem..."
+	btrfs check --readonly "$img/root.img" >/dev/null || die "root.img's filesystem has errors"
 
 	echo "## The EFI system partition's files..."
 	cp "$root/boot/grub/arm64-efi/core.efi" "$img/esp/EFI/BOOT/BOOTAA64.EFI"

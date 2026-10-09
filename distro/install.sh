@@ -2,7 +2,7 @@
 # Copyright (C) 2026 George Dobreff ("Witcher") and contributors
 # SPDX-License-Identifier: GPL-3.0-only
 
-# TarisOS's installer, run in macOS: curl -fsSL https://github.com/xxwitcher/tarisOS-packages/releases/download/image/install.sh | sh
+# TarisOS's installer, run in macOS: curl -fsSL https://github.com/xxwitcher/tarisOS/releases/latest/download/install.sh | sh
 # Starts the Asahi Linux installer (Asahi's Arch Linux ARM build of it) with TarisOS's list of
 # systems to install (installer_data.json). The installer makes room next to macOS, installs
 # TarisOS there and walks through Apple's step of allowing it to start (in recoveryOS).

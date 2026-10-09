@@ -8,8 +8,10 @@
 TARIS_REPO=taris
 TARIS_REPO_SERVER=https://github.com/xxwitcher/tarisOS-packages/releases/download/packages
 
-# Where the installer image (the zip) and installer_data.json are published
-TARIS_IMAGE_BASE=https://github.com/xxwitcher/tarisOS-packages/releases/download/image
+# Where the installer image (the zip), installer_data.json and install.sh are published: the latest
+# TarisOS release on the source repo (versioned releases, v1.0.0 and on; not pre-releases, which
+# "latest" skips)
+TARIS_IMAGE_BASE=https://github.com/xxwitcher/tarisOS/releases/latest/download
 TARIS_IMAGE_NAME=tarisos
 
 # Built from the AUR into the repository (fetched when the repository is built; a changed
