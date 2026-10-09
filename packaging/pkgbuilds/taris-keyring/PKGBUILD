@@ -14,7 +14,9 @@ url='https://github.com/xxwitcher/tarisOS'
 license=('GPL-3.0-only')
 install=taris-keyring.install
 source=('taris.gpg' 'taris-trusted' 'taris-revoked')
-sha256sums=()
+sha256sums=('7b2932603ec8c6e80738a8e0f73b74bb3ef5c1fad1a4085a448f47e4e50a8978'
+            '84d7ae41c35087e21b9ccb31df9cefd15fc31a1c2f76f5db78467d0288a398d1'
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
 
 package() {
     install -Dm644 taris.gpg taris-trusted taris-revoked -t "$pkgdir/usr/share/pacman/keyrings"

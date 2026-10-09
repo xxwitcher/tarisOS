@@ -125,7 +125,7 @@ You need:
 **1. Run the installer in macOS.** Open Terminal and run:
 
 ```sh
-curl -fsSL https://tarisos.com/install | sh
+curl -fsSL https://github.com/xxwitcher/tarisOS/releases/download/image/install.sh | sh
 ```
 
 This starts the Asahi Linux installer with TarisOS as the system to install. It asks for your
@@ -250,8 +250,8 @@ Publishing (`distro/config.sh` sets where):
   `taris.db`, `taris.files` and their `.sig` files as copies of the `.tar.gz` files of the same name
   (release assets can't be links).
 - **Image**: upload `tarisos.zip`, `installer_data.json` and `install.sh` from
-  `distro/out/images` to the release `image` (GitHub takes files under 2 GB), and serve
-  `install.sh` at `https://tarisos.com/install`.
+  `distro/out/images` to the release `image` (GitHub takes files under 2 GB). The install command
+  runs that `install.sh`.
 
 ## Working on the shell
 
@@ -978,6 +978,13 @@ Per-monitor token overrides are also available at
 | `install.sh`, `install-hypr.sh`, `install-agent-skills.sh` | Install the shell and the desktop on an existing Asahi Linux install, for working on them |
 
 ## Credits
+
+The Taris shell is a heavily modified version of the
+[Caelestia shell](https://github.com/caelestia-dots/shell) by
+[@soramanew](https://github.com/soramanew) and its contributors. Much of its code is Caelestia's,
+renamed and reworked for TarisOS. The `taris` command-line tool is built from
+[Caelestia's CLI](https://github.com/caelestia-dots/cli). Thank you to the Caelestia project;
+TarisOS isn't affiliated with it.
 
 TarisOS is built on [Asahi Linux](https://asahilinux.org/) and
 [Arch Linux ARM](https://archlinuxarm.org/), with [Quickshell](https://quickshell.outfoxxed.me) by

@@ -12,8 +12,9 @@ set -euo pipefail
 uid="TarisOS Packages <packages@tarisos.com>"
 keyring="$(cd "$(dirname "$0")/.." && pwd)/packaging/pkgbuilds/taris-keyring"
 
+# (gpg fails when there's no such key yet: that's an empty answer, not the end of the script)
 fingerprint() {
-	gpg --list-secret-keys --with-colons "=$uid" 2>/dev/null | awk -F: '$1 == "fpr" { print $10; exit }'
+	{ gpg --list-secret-keys --with-colons "=$uid" 2>/dev/null || true; } | awk -F: '$1 == "fpr" { print $10; exit }'
 }
 
 fpr=$(fingerprint)

@@ -9,7 +9,7 @@
 # snapper's .snapshots, and @factory, a read-only snapshot of the system as installed, for factory
 # reset) next to the EFI system partition's files, zipped (deflate; nothing else), with the
 # installer_data.json that offers it and the macOS command that starts the installer with it
-# (install.sh, for tarisos.com/install). Out: out/images. Big: everything is under out/, not /tmp.
+# (install.sh, published with the image). Out: out/images. Big: everything is under out/, not /tmp.
 set -euo pipefail
 
 [[ $EUID -eq 0 ]] || {
@@ -134,7 +134,7 @@ make_image() {
 	echo "## Zipping..."
 	(cd "$img" && zip -q -9 -r "../$name.zip" -- *)
 	installer_data "$name" "$(stat -c %s "$img/root.img")"
-	# The macOS command (tarisos.com/install), pointing at this list
+	# The macOS command (install.sh, published with the image), pointing at this list
 	sed "s|@INSTALLER_DATA@|$TARIS_IMAGE_BASE/installer_data.json|" "$here/install.sh" >"$images/install.sh"
 	rm -rf "$img"
 	echo "## Done: $images/$name.zip ($(du -h "$images/$name.zip" | cut -f1)), installer_data.json and install.sh"
