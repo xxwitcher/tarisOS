@@ -1,0 +1,47 @@
+# Copyright (C) 2026 George Dobreff ("Witcher") and contributors
+# SPDX-License-Identifier: GPL-3.0-only
+
+# TarisOS's snapshots and factory reset: snapper's settings for the root (a snapshot before every
+# package change, the last 10 kept, nothing on a schedule) and the factory reset, which brings back
+# @factory (the system as installed) from the initramfs at the next boot.
+
+pkgname=taris-snapshots
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='TarisOS: snapshots before package changes, and factory reset'
+arch=('any')
+url='https://github.com/xxwitcher/tarisOS'
+license=('GPL-3.0-only')
+depends=('snapper' 'btrfs-progs' 'mkinitcpio' 'util-linux' 'bash')
+backup=('etc/mkinitcpio.conf.d/taris-reset.conf' 'etc/taris/factory-reset.keep')
+source=(
+    'snapper-taris'
+    'snapshot'
+    'taris-snapshot-pre.hook'
+    'taris-snapshot-post.hook'
+    'factory-reset'
+    'initcpio-install'
+    'initcpio-hook'
+    'taris-reset.conf'
+    'factory-reset.keep'
+)
+sha256sums=('d17f3d350a3054e53e1048f011eed6f862deb7277b29662f8d77f4f535a8b31f'
+            'c0a877687760de491c2312a55ab4f322ab0fa9c44b907b18f7f3ed2f2f045fd0'
+            'f659216ba093848f23871545857652919fd66761e325ca76dd898cf4bb20954d'
+            '006f88e74df7b833f5a4713fcc88cf9d518512cc7ba621a262fdf18d868baeeb'
+            'fa212d068cc918ffca80e611ec45a21630d2fc1d52a0446b1304674d4ea7d31a'
+            'b32f182f2cb57a033fbaafbf9c6741c4c6f78a137bbd5717f4552840e3eb68d3'
+            '4389de8a609465ee3492856f7224c27e2cf6b15585f9dfc10ff6307709208a74'
+            'e941adca0c440a9315ad0882811803a5ecbb3da00b3bfc9ecd310b43a906408e'
+            '783a4709ef16d110e4214deffe1f6f371456abd9d75ce875741dfdf4f65bb1fe')
+
+package() {
+    install -Dm644 snapper-taris "$pkgdir/usr/share/snapper/config-templates/taris"
+    install -Dm755 snapshot factory-reset -t "$pkgdir/usr/lib/taris"
+    install -Dm644 taris-snapshot-pre.hook "$pkgdir/usr/share/libalpm/hooks/00-taris-snapshot-pre.hook"
+    install -Dm644 taris-snapshot-post.hook "$pkgdir/usr/share/libalpm/hooks/zz-taris-snapshot-post.hook"
+    install -Dm644 initcpio-install "$pkgdir/usr/lib/initcpio/install/taris-reset"
+    install -Dm644 initcpio-hook "$pkgdir/usr/lib/initcpio/hooks/taris-reset"
+    install -Dm644 taris-reset.conf "$pkgdir/etc/mkinitcpio.conf.d/taris-reset.conf"
+    install -Dm644 factory-reset.keep "$pkgdir/etc/taris/factory-reset.keep"
+}

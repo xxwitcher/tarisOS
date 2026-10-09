@@ -1,0 +1,8 @@
+# Copyright (C) 2026 George Dobreff ("Witcher") and contributors
+# SPDX-License-Identifier: GPL-3.0-only
+
+# The web apps every new account starts with: name, address, icon (in icons/), tab-separated
+YouTube	https://www.youtube.com	youtube.png
+Discord	https://discord.com/app	discord.png
+Kivi	https://kivi.gg	kivi.png
+Spotify	https://open.spotify.com	spotify.png

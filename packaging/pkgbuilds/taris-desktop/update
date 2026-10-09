@@ -1,0 +1,21 @@
+#!/bin/bash
+# Copyright (C) 2026 George Dobreff ("Witcher") and contributors
+# SPDX-License-Identifier: GPL-3.0-only
+
+# Everything updated at once (the Updates page runs it in a terminal): Arch Linux ARM, Asahi, the
+# TarisOS repository and the AUR (yay, else pacman; taris-snapshots takes a snapshot before any
+# package changes), then the Flatpak apps.
+set -u
+
+status=0
+if command -v yay >/dev/null; then
+	yay -Syu || status=$?
+else
+	sudo pacman -Syu || status=$?
+fi
+
+if command -v flatpak >/dev/null; then
+	echo
+	flatpak update --system --noninteractive || status=$?
+fi
+exit "$status"

@@ -1,0 +1,185 @@
+#!/bin/bash
+# Copyright (C) 2026 George Dobreff ("Witcher") and contributors
+# SPDX-License-Identifier: GPL-3.0-only
+
+# Builds TarisOS's installer image on this Mac (as root: sudo distro/build-image.sh), in the format
+# the Asahi Linux installer installs, as Asahi's own Arch Linux ARM images are made: Arch Linux
+# ARM's root tarball, set up in a chroot by image/scripts (from the TarisOS repository build-repo.sh
+# made, out/repo), copied into a btrfs root.img (@ for the system, @home for the home folders,
+# snapper's .snapshots, and @factory, a read-only snapshot of the system as installed, for factory
+# reset) next to the EFI system partition's files, zipped (deflate; nothing else), with the
+# installer_data.json that offers it and the macOS command that starts the installer with it
+# (install.sh, for tarisos.com/install). Out: out/images. Big: everything is under out/, not /tmp.
+set -euo pipefail
+
+[[ $EUID -eq 0 ]] || {
+	echo "Run it as root: sudo $0" >&2
+	exit 1
+}
+
+here=$(cd "$(dirname "$0")" && pwd)
+. "$here/config.sh"
+keyring=$(cd "$here/../packaging/pkgbuilds/taris-keyring" && pwd)
+
+base_url=http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
+work=$TARIS_OUT/image
+dl=$work/dl
+root=$work/root
+mnt=$work/mnt
+images=$TARIS_OUT/images
+repo=$TARIS_OUT/repo
+
+# The root filesystem's UUID is the image's (Asahi's first boot can't change a mounted btrfs's), a
+# new one each build; the EFI partition's is the installer's (installer_data.json's volume_id) until
+# the first boot changes it
+ROOT_UUID=$(uuidgen)
+EFI_UUID=2ABF-9F91
+export ROOT_UUID EFI_UUID
+
+die() {
+	echo "build-image: $*" >&2
+	exit 1
+}
+
+[[ -f $repo/$TARIS_REPO.db.tar.gz ]] || die "no repository: run distro/build-repo.sh first"
+[[ -s $keyring/taris.gpg && -s $keyring/taris-trusted ]] || die "no signing key: run distro/make-signing-key.sh first"
+pacman -S --needed --noconfirm arch-install-scripts btrfs-progs rsync zip dosfstools util-linux >/dev/null
+
+clean_mounts() {
+	local target
+	while grep -q " ${root}[/ ]\| ${mnt}[/ ]" /proc/mounts; do
+		grep -o " \(${root}\|${mnt}\)[^ ]*" /proc/mounts | sort -r | while read -r target; do
+			umount "$target" 2>/dev/null || umount -l "$target" 2>/dev/null || true
+		done
+		sleep 0.1
+	done
+}
+trap clean_mounts EXIT
+
+# Arch Linux ARM's root, with Asahi's keyring and what the setup scripts need
+init() {
+	clean_mounts
+	mkdir -p "$dl" "$mnt" "$images"
+	if [[ ! -e $dl/base.tar.gz ]]; then
+		echo "## Downloading Arch Linux ARM..."
+		curl -fL "$base_url" -o "$dl/base.tar.gz.part"
+		curl -fsSL "$base_url.md5" | awk '{ print $1 "  '"$dl"'/base.tar.gz.part" }' | md5sum -c - >/dev/null ||
+			die "the download is damaged"
+		mv "$dl/base.tar.gz.part" "$dl/base.tar.gz"
+	fi
+	rm -rf "$root"
+	mkdir -p "$root"
+	echo "## Unpacking..."
+	bsdtar -xpf "$dl/base.tar.gz" -C "$root"
+	mount --bind "$root" "$root"
+	cp "$root/etc/pacman.d/mirrorlist" "$root/etc/pacman.d/mirrorlist.orig"
+	pacstrap -G "$root" asahi-alarm-keyring >/dev/null
+
+	# For the setup scripts: their files, and the repository (pacman's [taris] while building)
+	mkdir -p "$root/taris-build" "$root/taris-repo"
+	cp "$here"/image/files/* "$keyring/taris.gpg" "$keyring/taris-trusted" "$root/taris-build/"
+	mount --bind "$repo" "$root/taris-repo"
+}
+
+run_scripts() {
+	local script
+	for script in "$here"/image/scripts/*.sh; do
+		echo "## ${script##*/}"
+		arch-chroot "$root" /bin/bash <"$script"
+	done
+}
+
+# The pacman settings an installed system keeps: the published repository
+finish_root() {
+	sed -i "s|^Server = file:///taris-repo$|Server = $TARIS_REPO_SERVER|" "$root/etc/pacman.conf"
+	umount "$root/taris-repo"
+	rm -rf "$root/taris-build" "$root/taris-repo"
+	mv -f "$root/etc/pacman.d/mirrorlist.orig" "$root/etc/pacman.d/mirrorlist"
+	rm -f "$root"/var/cache/pacman/pkg/*
+}
+
+make_image() {
+	local name="$TARIS_IMAGE_NAME" img size
+	img="$images/$name"
+	rm -rf "$img" "$images/$name.zip"
+	mkdir -p "$img/esp/EFI/BOOT"
+
+	echo "## Making root.img..."
+	size=$(du -B M -s -x "$root" | cut -dM -f1)
+	size=$((size + size / 8 + 256))
+	truncate -s "${size}M" "$img/root.img"
+	mkfs.btrfs -q -U "$ROOT_UUID" -L taris-root "$img/root.img"
+
+	mount -o loop,subvolid=5 "$img/root.img" "$mnt"
+	btrfs subvolume create "$mnt/@" >/dev/null
+	btrfs subvolume create "$mnt/@home" >/dev/null
+	umount "$mnt"
+
+	mount -o loop,subvol=@,compress=zstd:1 "$img/root.img" "$mnt"
+	rsync -aHAX --exclude /etc/machine-id --exclude '/boot/efi/*' --exclude '/tmp/*' "$root/" "$mnt/"
+	# snapper's settings for the root, and its folder (a subvolume of its own)
+	arch-chroot "$mnt" snapper --no-dbus -c root create-config -t taris /
+	arch-chroot "$mnt" grub-mkconfig -o /boot/grub/grub.cfg
+	umount -R "$mnt"
+
+	# The system as installed, for factory reset
+	mount -o loop,subvolid=5 "$img/root.img" "$mnt"
+	btrfs subvolume snapshot -r "$mnt/@" "$mnt/@factory" >/dev/null
+	umount "$mnt"
+
+	echo "## The EFI system partition's files..."
+	cp "$root/boot/grub/arm64-efi/core.efi" "$img/esp/EFI/BOOT/BOOTAA64.EFI"
+	cp -r "$root/boot/efi/m1n1" "$img/esp/"
+
+	echo "## Zipping..."
+	(cd "$img" && zip -q -9 -r "../$name.zip" -- *)
+	installer_data "$name" "$(stat -c %s "$img/root.img")"
+	# The macOS command (tarisos.com/install), pointing at this list
+	sed "s|@INSTALLER_DATA@|$TARIS_IMAGE_BASE/installer_data.json|" "$here/install.sh" >"$images/install.sh"
+	rm -rf "$img"
+	echo "## Done: $images/$name.zip ($(du -h "$images/$name.zip" | cut -f1)), installer_data.json and install.sh"
+}
+
+# What the Asahi installer offers: TarisOS, with an EFI system partition and the root (grown to the
+# space given to it)
+installer_data() {
+	cat >"$images/installer_data.json" <<JSON
+{
+  "os_list": [
+    {
+      "name": "TarisOS",
+      "default_os_name": "TarisOS",
+      "boot_object": "m1n1.bin",
+      "next_object": "m1n1/boot.bin",
+      "package": "$TARIS_IMAGE_BASE/$1.zip",
+      "supported_fw": ["12.3", "12.3.1", "13.5", "14.8.3"],
+      "extras": {},
+      "partitions": [
+        {
+          "name": "EFI",
+          "type": "EFI",
+          "size": "524288000B",
+          "format": "fat",
+          "volume_id": "0x2abf9f91",
+          "copy_firmware": true,
+          "copy_installer_data": true,
+          "source": "esp"
+        },
+        {
+          "name": "Root",
+          "type": "Linux",
+          "size": "${2}B",
+          "expand": true,
+          "image": "root.img"
+        }
+      ]
+    }
+  ]
+}
+JSON
+}
+
+init
+run_scripts
+finish_root
+make_image

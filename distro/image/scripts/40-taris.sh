@@ -1,0 +1,35 @@
+#!/bin/bash
+# Copyright (C) 2026 George Dobreff ("Witcher") and contributors
+# SPDX-License-Identifier: GPL-3.0-only
+
+# TarisOS (the taris meta package) and the default apps, each installed on its own (explicitly) so
+# any of them can be removed. VS Code and Claude Code aren't in the image: they're installed the
+# first time they're used. CJK fonts and input methods come when a language needs them.
+set -euo pipefail
+
+pacman --noconfirm -S taris-keyring
+pacman --noconfirm --needed -S taris
+
+apps=(
+	kitty                  # terminal
+	nautilus localsearch   # files, and their search index
+	sushi                  # Nautilus's previews (Space)
+	fuzzel                 # app launcher, when the shell isn't running
+	swappy                 # screenshot editor
+	chromium widevine      # browser, and DRM'd video (Spotify, Netflix)
+	gnome-text-editor      # text editor
+	neovim                 # editor in the terminal
+	imv                    # images
+	mpv                    # video
+	evince                 # PDFs
+	nordvpn-bin            # VPN (its daemon starts on first use)
+	flatpak                # apps from Flathub (the Store)
+	yay base-devel git     # the AUR (the Store, >install)
+	xdg-user-dirs          # Documents, Downloads, Pictures…
+	noto-fonts noto-fonts-emoji
+	power-profiles-daemon
+)
+pacman --noconfirm --needed -S "${apps[@]}"
+
+# Flathub, for every account (system-wide: snapshots and factory reset cover it)
+flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo

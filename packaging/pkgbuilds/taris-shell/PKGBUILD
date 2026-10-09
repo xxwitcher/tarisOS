@@ -1,0 +1,92 @@
+# Copyright (C) 2026 George Dobreff ("Witcher") and contributors
+# SPDX-License-Identifier: GPL-3.0-only
+
+# The TarisOS desktop shell (this repository's shell folder), with its greeter and first-boot setup
+# screen. Runs on quickshell-taris. The version is the shell's own (utils/Release.qml).
+#
+# TARIS_SRC=/path/to/shell builds another checkout's shell folder.
+
+pkgname=taris-shell
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='The TarisOS desktop shell'
+arch=('aarch64')
+url='https://github.com/xxwitcher/tarisOS'
+license=('GPL-3.0-only')
+depends=(
+    'taris-cli'
+    'quickshell-taris'
+    'glibc'
+    'gcc-libs'
+
+    # Brightness
+    'ddcutil'
+    'brightnessctl'
+
+    # Services
+    'libcava'
+    'networkmanager'
+    'lm_sensors'
+    'aubio'
+    'libpipewire'
+    'libqalculate'
+    'power-profiles-daemon'
+
+    # Fonts
+    'ttf-material-symbols-variable'
+    'ttf-rubik-vf'
+    'ttf-cascadia-code-nerd'
+
+    # Icons (the shell resolves app icons through the GTK icon theme)
+    'papirus-icon-theme'
+
+    # Qt modules
+    'qt6-base'
+    'qt6-declarative'
+    'qt6-imageformats'
+    'qt6-m3shapes-git'
+
+    # The Agent tab's terminal, fan control, the Store, the file picker, web apps
+    'qmltermwidget'
+    'python'
+    'python-gobject'
+    'mise'
+    'pacman-contrib'
+    'flatpak'
+    'archlinux-appstream-data'
+    'libjxl'
+    'file'
+    'curl'
+
+    # Extra functionality
+    'swappy'
+    'bash'
+)
+optdepends=(
+    'fprintd: fingerprint unlock for the lock screen'
+    'yay: AUR apps in the Store and >install'
+)
+makedepends=('cmake' 'ninja' 'qt6-shadertools')
+provides=('taris-silicon')
+conflicts=('taris-silicon')
+replaces=('taris-silicon')
+
+_src() {
+    echo "${TARIS_SRC:-$startdir/../../../shell}"
+}
+
+build() {
+    cmake -S "$(_src)" -B "$srcdir/build" -G Ninja \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_INSTALL_PREFIX=/ \
+        -DVERSION="$pkgver" \
+        -DGIT_REVISION="$pkgver-$pkgrel" \
+        -DDISTRIBUTOR="TarisOS (package: $pkgname)"
+    cmake --build "$srcdir/build"
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install "$srcdir/build"
+    install -Dm644 "$(_src)/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 "$(_src)/NOTICE" "$pkgdir/usr/share/licenses/$pkgname/NOTICE"
+}

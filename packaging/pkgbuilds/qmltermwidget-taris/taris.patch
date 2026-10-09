@@ -1,0 +1,64 @@
+diff -ruN a/lib/Emulation.cpp b/lib/Emulation.cpp
+--- a/lib/Emulation.cpp	2026-10-08 12:02:39.747252590 +0100
++++ b/lib/Emulation.cpp	2026-10-08 12:02:39.768143735 +0100
+@@ -316,8 +316,21 @@
+     return _currentScreen->getLines() + _currentScreen->getHistLines();
+ }
+ 
++// Taris: the terminal is drawn inside the shell's full-screen surface, so every update
++// redraws the whole screen in the shell and the compositor. While a program streams output,
++// show its screen at most ~30 times a second (still immediate to the eye) instead of up to ~100.
++static const int MIN_BULK_INTERVAL = 33;
++
+ void Emulation::showBulk()
+ {
++    if (_lastBulk.isValid() && _lastBulk.elapsed() < MIN_BULK_INTERVAL)
++    {
++        _bulkTimer1.setSingleShot(true);
++        _bulkTimer1.start(MIN_BULK_INTERVAL - static_cast<int>(_lastBulk.elapsed()));
++        return;
++    }
++    _lastBulk.start();
++
+     _bulkTimer1.stop();
+     _bulkTimer2.stop();
+ 
+diff -ruN a/lib/Emulation.h b/lib/Emulation.h
+--- a/lib/Emulation.h	2026-10-08 12:02:39.747274966 +0100
++++ b/lib/Emulation.h	2026-10-08 12:02:39.768087735 +0100
+@@ -30,6 +30,7 @@
+ #include <QKeyEvent>
+ //#include <QPointer>
+ #include <QTextStream>
++#include <QElapsedTimer>
+ #include <QTimer>
+ #include <QStringDecoder>
+ 
+@@ -503,6 +504,8 @@
+   bool _bracketedPasteMode;
+   QTimer _bulkTimer1{this};
+   QTimer _bulkTimer2{this};
++  // When the screen was last shown (Taris: at most one update every MIN_BULK_INTERVAL ms)
++  QElapsedTimer _lastBulk;
+   QStringDecoder _toUtf16;
+ };
+ 
+diff -ruN a/lib/TerminalDisplay.cpp b/lib/TerminalDisplay.cpp
+--- a/lib/TerminalDisplay.cpp	2026-10-08 12:02:39.748046219 +0100
++++ b/lib/TerminalDisplay.cpp	2026-10-08 12:02:39.768361736 +0100
+@@ -3943,7 +3943,15 @@
+ void TerminalDisplay::itemChange(ItemChange change, const ItemChangeData & value)
+ {
+     switch (change) {
++    // Taris: in a new window its picture is a new texture, which a partial repaint (only the
++    // lines that changed) leaves mostly uninitialised: magenta and noise. Repaint all of it.
++    case QQuickItem::ItemSceneChange:
++        if (value.window)
++            update();
++        break;
+     case QQuickItem::ItemVisibleHasChanged:
++        if (value.boolValue)
++            update();
+         if (value.boolValue && _screenWindow) {
+             if (this->columns() != _screenWindow->columnCount() ||
+                 this->lines() != _screenWindow->lineCount()) {

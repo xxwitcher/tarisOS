@@ -1,0 +1,29 @@
+#!/bin/bash
+# Copyright (C) 2026 George Dobreff ("Witcher") and contributors
+# SPDX-License-Identifier: GPL-3.0-only
+
+# Apps installed on first use (their greyed-out stand-ins in the launcher and the dock):
+# install-on-demand <app> installs it (from the TarisOS repository, with the system's pending
+# updates) in a terminal, then opens it; once installed it just opens.
+set -u
+
+case ${1:-} in
+code) package=visual-studio-code-bin name="VS Code" command=code ;;
+*)
+	echo "install-on-demand: unknown app: ${1:-}" >&2
+	exit 1
+	;;
+esac
+
+command -v "$command" >/dev/null && exec "$command"
+
+exec "${TERMINAL:-kitty}" -e bash -c '
+	package=$1 name=$2 command=$3
+	printf "Installing %s…\n\n" "$name"
+	if sudo pacman -Syu --needed "$package"; then
+		setsid -f "$command" >/dev/null 2>&1
+		exit 0
+	fi
+	printf "\n%s could not be installed. Press Enter to close." "$name"
+	read -r
+' _ "$package" "$name" "$command"
