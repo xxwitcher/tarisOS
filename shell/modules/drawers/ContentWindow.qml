@@ -144,6 +144,8 @@ StyledWindow {
         }
     }
 
+    // Under the shell's shapes: it darkens the apps, not the shell (the panels behind a dialog have
+    // their contents faded as much instead: Panels.dim)
     StyledRect {
         anchors.fill: parent
         opacity: (root.screenState.session && Config.session.enabled) || panels.popouts.detachedMode !== "" ? 0.5 : 0
@@ -338,8 +340,16 @@ StyledWindow {
                 matrix: panels.popouts.isDetached ? dialogBg.deformMatrix : popoutBg.deformMatrix
             }
             // A dialog (Settings, the Store, the file picker, the terminal) is over every other
-            // panel: notifications, the OSD and the rest stay behind it
+            // panel: notifications, the OSD and the rest stay behind it, their contents faded as much
+            // as the scrim darkens the apps
+            dim: panels.popouts.isDetached ? 0.5 : 0
             popoutsWrapper.z: panels.popouts.isDetached ? 2 : 0
+
+            Behavior on dim {
+                Anim {
+                    type: Anim.SlowEffects
+                }
+            }
 
             // The dialog's shape, with its own shadow: above the other panels' shapes and contents,
             // under the dialog's (it's in the panels' item, which starts after the bar and border)

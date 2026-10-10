@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Taris.Config
 import qs.components
@@ -23,6 +24,10 @@ Item {
     required property ScreenState screenState
     required property Bar.BarWrapper bar
     required property real borderThickness
+    // How much the panels' contents fade into their shapes (0 to 1): behind a dialog, as much as the
+    // scrim darkens the apps. Their shapes, drawn with the shell's, keep its colour, and the cards on
+    // them stay apart from them (darkened towards black, they'd be the shapes' colour).
+    property real dim
 
     readonly property alias osd: osd
     readonly property alias osdWrapper: osdWrapper
@@ -44,6 +49,8 @@ Item {
     Item {
         id: osdWrapper
 
+        layer.enabled: root.dim > 0
+        layer.effect: Dim {}
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
         anchors.rightMargin: session.width * (1 - session.offsetScale)
@@ -67,6 +74,8 @@ Item {
     Notifications.Wrapper {
         id: notifications
 
+        layer.enabled: root.dim > 0
+        layer.effect: Dim {}
         screenState: root.screenState
         sidebarPanel: sidebar
         dashboardPanel: dashboard
@@ -81,6 +90,8 @@ Item {
     Item {
         id: sessionWrapper
 
+        layer.enabled: root.dim > 0
+        layer.effect: Dim {}
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
         // The notification sidebar is short now (top only), so the OSD and session menu stay on
@@ -104,6 +115,8 @@ Item {
     Launcher.Wrapper {
         id: launcher
 
+        layer.enabled: root.dim > 0
+        layer.effect: Dim {}
         screen: root.screen
         screenState: root.screenState
         panels: root
@@ -116,6 +129,8 @@ Item {
     Dock.Wrapper {
         id: dock
 
+        layer.enabled: root.dim > 0
+        layer.effect: Dim {}
         screenState: root.screenState
 
         anchors.horizontalCenter: parent.horizontalCenter
@@ -125,6 +140,8 @@ Item {
     Dashboard.Wrapper {
         id: dashboard
 
+        layer.enabled: root.dim > 0
+        layer.effect: Dim {}
         screenState: root.screenState
 
         anchors.horizontalCenter: parent.horizontalCenter
@@ -141,6 +158,8 @@ Item {
     Utilities.Wrapper {
         id: utilities
 
+        layer.enabled: root.dim > 0
+        layer.effect: Dim {}
         screenState: root.screenState
         sidebar: sidebar
         popouts: popoutsWrapper.content
@@ -152,6 +171,8 @@ Item {
     Sidebar.Wrapper {
         id: sidebar
 
+        layer.enabled: root.dim > 0
+        layer.effect: Dim {}
         screenState: root.screenState
 
         // Drops down from the top, as tall as the quick actions panel
@@ -159,5 +180,9 @@ Item {
         anchors.top: notifications.bottom
         anchors.right: parent.right
         anchors.topMargin: -notifications.anchors.topMargin - (implicitHeight + 5) * offsetScale
+    }
+
+    component Dim: MultiEffect {
+        opacity: 1 - root.dim
     }
 }
