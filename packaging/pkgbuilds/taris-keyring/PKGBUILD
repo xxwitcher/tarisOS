@@ -7,15 +7,15 @@
 
 pkgname=taris-keyring
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc='TarisOS: the package signing key'
 arch=('any')
 url='https://github.com/xxwitcher/tarisOS'
 license=('GPL-3.0-only')
 install=taris-keyring.install
 source=('taris.gpg' 'taris-trusted' 'taris-revoked')
-sha256sums=('7b2932603ec8c6e80738a8e0f73b74bb3ef5c1fad1a4085a448f47e4e50a8978'
-            '84d7ae41c35087e21b9ccb31df9cefd15fc31a1c2f76f5db78467d0288a398d1'
+sha256sums=('cb3f81a57d288c39c38202123279f3eaacbab4ead68d498c3500a4b4f3985416'
+            'd5e2eea3be67db181cf5660ac17dc3c54c47c5ff53f6d8f52d918228e79cb794'
             'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
 
 package() {
