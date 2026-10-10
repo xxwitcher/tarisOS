@@ -2,9 +2,9 @@
 # Copyright (C) 2026 George Dobreff ("Witcher") and contributors
 # SPDX-License-Identifier: GPL-3.0-only
 
-# A new account's TarisOS defaults, in its home folder: the Witcher colour theme, the first
-# wallpaper and the wallpaper collection, the preinstalled web apps, the agent skills and bash's
-# extras. Run as the account by the setup screen when it creates it, and at login
+# A new account's TarisOS defaults, in its home folder: the Taris colour theme, its
+# wallpaper and the wallpaper collection, the preinstalled web apps, swappy's settings, the agent
+# skills and bash's extras. Run as the account by the setup screen when it creates it, and at login
 # (--if-new: only once per account, for accounts added later).
 set -u
 
@@ -22,13 +22,13 @@ mkdir -p "$state" "$config/taris" "$data"
 walls="${TARIS_WALLPAPERS_DIR:-$HOME/Pictures/Wallpapers}"
 mkdir -p "$walls"
 [[ -e $walls/TarisOS || -L $walls/TarisOS ]] || ln -s /usr/share/backgrounds/taris "$walls/TarisOS"
-if [[ ! -s $state/wallpaper/path.txt && -f /usr/share/backgrounds/taris/1.webp ]]; then
-	taris wallpaper -f /usr/share/backgrounds/taris/1.webp -N >/dev/null 2>&1 || true
+if [[ ! -s $state/wallpaper/path.txt && -f /usr/share/backgrounds/taris/18.webp ]]; then
+	taris wallpaper -f /usr/share/backgrounds/taris/18.webp -N >/dev/null 2>&1 || true
 fi
 
-# The Witcher colour theme (gruvbox soft dark with its colours changed) among the saved themes on
+# The Taris colour theme (gruvbox soft dark with its colours changed) among the saved themes on
 # Settings > Colours, and on
-theme="$share/defaults/witcher-theme.json"
+theme="$share/defaults/taris-theme.json"
 if [[ -f $theme ]]; then
 	python3 -I - "$theme" "$config/taris/colour-overrides.json" <<'PY' || true
 import json, sys
@@ -81,6 +81,14 @@ fi
 # The dock: the browser, the files, the terminal and VS Code (installed the first time it's opened)
 if [[ ! -e $state/dock.json ]]; then
 	printf '{\n    "pinned": ["chromium", "org.gnome.Nautilus", "kitty", "taris-install-code"]\n}\n' >"$state/dock.json"
+fi
+
+# swappy (the screenshot editor) reads its settings only from the account's folder. Its own
+# default saves to ~/Desktop, or the home folder without one, and stays open, so Save seemed to do
+# nothing: Save goes to the screenshots folder, and saving or copying closes it.
+if [[ ! -e $config/swappy/config ]]; then
+	mkdir -p "$config/swappy"
+	printf '[Default]\nsave_dir=$HOME/Pictures/Screenshots\nearly_exit=true\n' >"$config/swappy/config"
 fi
 
 # Instructions for coding agents, where the agents look for them

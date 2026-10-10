@@ -10,7 +10,8 @@ import qs.utils
 
 // Every Hyprland option, from `hyprctl descriptions -j`. Changes apply live through
 // `hyprctl eval` and, when Hyprland accepts them, are kept in hypr-settings.json and
-// written to hypr-settings.lua, which hyprland.lua loads at the end so they persist.
+// written to hypr-settings.lua, which hyprland.lua loads at the end so they persist. TarisOS's own
+// settings in its Hyprland config (the taris_* globals, such as taris_fn_switch) go the same way.
 Singleton {
     id: root
 
@@ -20,6 +21,7 @@ Singleton {
     property string lastError
     readonly property var overrides: adapter.overrides
     readonly property var monitors: adapter.monitors
+    readonly property var taris: adapter.taris
 
     // m: { mode, position, scale, transform, mirror, disabled }
     function monitorLua(name: string, m: var): string {
@@ -52,6 +54,20 @@ Singleton {
     function saveMonitors(monitors: var): void {
         adapter.monitors = Object.assign({}, adapter.monitors, monitors);
         previewMonitors(monitors);
+        writeLua();
+    }
+
+    // _G.taris_<name> = value, for a config that has it
+    function tarisLua(name: string, value: var): string {
+        return `if _G.taris_${name} ~= nil then _G.taris_${name} = ${luaValue(value)} end`;
+    }
+
+    // One of TarisOS's own settings (taris_<name>), applied live and kept
+    function setTaris(name: string, value: var): void {
+        adapter.taris = Object.assign({}, adapter.taris, {
+            [name]: value
+        });
+        Quickshell.execDetached(["hyprctl", "eval", tarisLua(name, value)]);
         writeLua();
     }
 
@@ -119,6 +135,8 @@ Singleton {
             lines.push(`pcall(function() ${luaFor(name, value)} end)`);
         for (const [name, m] of Object.entries(adapter.monitors))
             lines.push(`pcall(function() ${monitorLua(name, m)} end)`);
+        for (const [name, value] of Object.entries(adapter.taris))
+            lines.push(tarisLua(name, value));
         luaFile.setText(lines.join("\n") + "\n");
     }
 
@@ -184,6 +202,7 @@ Singleton {
 
             property var overrides: ({})
             property var monitors: ({})
+            property var taris: ({})
         }
     }
 }

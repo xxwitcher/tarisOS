@@ -32,9 +32,9 @@ Scope {
             }
         }
 
-        if (!hibernateTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
-            Toaster.toast(Tr.tr("Hibernating in 5 seconds"), Tr.tr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
-            hibernateTimer.start();
+        if (!sleepTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
+            Toaster.toast(Tr.tr("Sleeping in 5 seconds"), Tr.tr("The battery is almost empty"), "battery_android_alert", Toast.Error);
+            sleepTimer.start();
         }
 
         root.lastPercentage = p;
@@ -79,10 +79,12 @@ Scope {
         target: UPower.displayDevice
     }
 
+    // Hibernates where the system can, else sleeps (Apple Silicon can't hibernate: a plain
+    // hibernate would do nothing and the battery would run out)
     Timer {
-        id: hibernateTimer
+        id: sleepTimer
 
         interval: 5000
-        onTriggered: SessionManager.hibernate()
+        onTriggered: SessionManager.suspendThenHibernate()
     }
 }

@@ -201,7 +201,7 @@ PageBase {
         }
 
         SectionHeader {
-            text: Tr.tr("Transparency & scale")
+            text: Tr.tr("System Transparency & Scale")
         }
 
         ToggleRow {
@@ -209,6 +209,15 @@ PageBase {
             text: Tr.tr("Transparency")
             checked: Tokens.transparency.enabled
             onToggled: GlobalConfig.appearance.transparency.enabled = checked
+        }
+
+        ToggleRow {
+            visible: Tokens.transparency.enabled
+            text: Tr.tr("Blur behind panels")
+            checked: WindowStyle.style.shellblur !== "0"
+            onToggled: WindowStyle.save({
+                    shellblur: checked ? "1" : "0"
+                })
         }
 
         StepperRow {

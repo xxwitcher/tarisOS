@@ -36,10 +36,11 @@ Singleton {
     property bool wanted
     property bool schemeReady
 
-    // The terminal's colours, from Taris's scheme. QMLTermWidget only reads schemes from its own
-    // folder, so install.sh links this file there as Taris.colorscheme. It looks schemes up once,
-    // so the terminal starts only once the file is written, and new colours apply when the shell
-    // restarts.
+    // The shell's terminals' colours (this one's and the overlay terminal's), from Taris's scheme:
+    // Taris.colorscheme in the account's own folder for them, which qmltermwidget-taris looks in.
+    // Written from the shell's start (ServiceLoader), as the overlay terminal can come first. It
+    // looks schemes up once, so the terminal starts only once the file is written, and new colours
+    // apply when the shell restarts.
     FileView {
         readonly property string scheme: {
             const p = Colours.palette;
@@ -52,7 +53,7 @@ Singleton {
             return out;
         }
 
-        path: `${Paths.state}/agent-terminal.colorscheme`
+        path: `${Paths.state}/terminal/Taris.colorscheme`
         printErrors: false
         onSchemeChanged: setText(scheme)
         onSaved: root.schemeReady = true

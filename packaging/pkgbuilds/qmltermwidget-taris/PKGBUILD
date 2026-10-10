@@ -4,13 +4,15 @@
 # QMLTermWidget (the terminal in the dashboard's Agent tab) with TarisOS's patches
 # (taris.patch): at most ~30 screen updates a second, since every update redraws the shell's
 # full-screen surface, and a full repaint when it's put in a window or shown again (a partial one
-# left the new texture magenta). Based on Arch's qmltermwidget PKGBUILD, same upstream commit.
+# left the new texture magenta), and colour schemes also found in each account's
+# $XDG_STATE_HOME/taris/terminal (the shell writes Taris.colorscheme there from the colour scheme).
+# Based on Arch's qmltermwidget PKGBUILD, same upstream commit.
 
 pkgname=qmltermwidget-taris
 _pkgname=qmltermwidget
 _commit=ce8e09ad4daeb9fe59b60d6b228b0f7cf4055e16
 pkgver=2.0.0.git1
-pkgrel=1
+pkgrel=2
 pkgdesc='QML port of qtermwidget, patched for the TarisOS shell'
 arch=('x86_64' 'aarch64')
 url='https://github.com/Swordfish90/qmltermwidget'
@@ -21,7 +23,7 @@ conflicts=("$_pkgname")
 source=("$_pkgname-$_commit.tar.gz::https://github.com/Swordfish90/qmltermwidget/archive/$_commit.tar.gz"
         'taris.patch')
 sha256sums=('928b7791269f275d953ef0a38d14d1b7196654812243e9cf7b03975b12022c76'
-            '89addcb6340c3aad308cba9eacd529ec9d298e8714f7ab7bbefd835c40040b46')
+            '362a8a26a09072844b4175f36a38b989cc640617cc5f2c29dc84efbaf6af0d8a')
 
 prepare() {
   cd "$_pkgname-$_commit"

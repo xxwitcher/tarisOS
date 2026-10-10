@@ -9,9 +9,10 @@ import Quickshell
 // app and open it): shown greyed out in the launcher and the dock until the app is installed, then
 // the app's own entry takes their place
 Singleton {
-    // The stand-in's entry id -> the installed app's entry id
+    // The stand-in's entry id -> the ids the installed app's entry can have (VS Code's arm64
+    // package names it com.microsoft.VSCode, other builds code)
     readonly property var apps: ({
-            "taris-install-code": "code"
+            "taris-install-code": ["com.microsoft.VSCode", "code", "visual-studio-code"]
         })
 
     function isPlaceholder(entry: var): bool {
@@ -20,8 +21,13 @@ Singleton {
 
     // The installed app's entry for a stand-in's id (null until it's installed)
     function installedFor(id: string): var {
-        const real = apps[id];
-        return real ? DesktopEntries.byId(real) : null;
+        DesktopEntries.applications.values; // Again when apps are installed or removed
+        for (const real of apps[id] ?? []) {
+            const entry = DesktopEntries.byId(real);
+            if (entry)
+                return entry;
+        }
+        return null;
     }
 
     function hidden(entry: var): bool {

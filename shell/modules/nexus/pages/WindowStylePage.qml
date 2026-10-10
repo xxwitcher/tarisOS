@@ -12,8 +12,9 @@ import qs.components.controls
 import qs.services
 import qs.modules.nexus.common
 
-// Windows and Window border, as in the witchers-tweaks settings app (WindowStyle: window-style.conf,
-// read by hypr-taris.lua). The border follows the colour scheme until a colour is picked here.
+// Windows, their transparency and blur, and the window border, as in the witchers-tweaks settings
+// app (WindowStyle: window-style.conf, read by taris.lua). The border follows the colour scheme
+// until a colour is picked here.
 PageBase {
     id: root
 
@@ -167,6 +168,62 @@ PageBase {
             checked: root.style.columns === "1"
             onToggled: root.save({
                     columns: checked ? "1" : "0"
+                })
+        }
+
+        SectionHeader {
+            text: Tr.tr("Transparency & blur")
+        }
+
+        RangeRow {
+            first: true
+            icon: "opacity"
+            label: Tr.tr("Window opacity")
+            from: 30
+            to: 100
+            step: 5
+            current: Number(root.style.opacity)
+            format: v => `${Math.round(v)}%`
+            onCommitted: v => root.save({
+                    opacity: String(Math.round(v))
+                })
+        }
+
+        ToggleRow {
+            last: root.style.blur === "0" && root.style.shellblur === "0"
+            text: Tr.tr("Blur behind windows")
+            checked: root.style.blur !== "0"
+            onToggled: root.save({
+                    blur: checked ? "1" : "0"
+                })
+        }
+
+        RangeRow {
+            visible: root.style.blur !== "0" || root.style.shellblur !== "0"
+            icon: "blur_on"
+            label: Tr.tr("Blur size")
+            from: 1
+            to: 20
+            step: 1
+            current: Number(root.style.blursize)
+            format: v => String(Math.round(v))
+            onCommitted: v => root.save({
+                    blursize: String(Math.round(v))
+                })
+        }
+
+        RangeRow {
+            visible: root.style.blur !== "0" || root.style.shellblur !== "0"
+            last: true
+            icon: "blur_linear"
+            label: Tr.tr("Blur passes")
+            from: 1
+            to: 4
+            step: 1
+            current: Number(root.style.blurpasses)
+            format: v => String(Math.round(v))
+            onCommitted: v => root.save({
+                    blurpasses: String(Math.round(v))
                 })
         }
 

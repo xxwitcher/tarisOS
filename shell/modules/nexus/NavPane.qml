@@ -22,6 +22,9 @@ ColumnLayout {
         id: searchField
 
         Layout.fillWidth: true
+        // Over the page list, which reaches up under it (its negative top margin): scrolled, the
+        // list's rows would otherwise be on top here and take the clicks meant for the search
+        z: 1
 
         placeholderText: Tr.tr("Search settings")
         font: Tokens.font.body.large

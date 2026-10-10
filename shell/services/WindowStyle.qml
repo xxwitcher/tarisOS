@@ -10,9 +10,11 @@ import qs.services
 import qs.utils
 
 // Window style (Settings > Window style): window-style.conf, key=value lines read by
-// hypr-taris.lua; saving reloads Hyprland. With bordertheme on, the border takes its colours
+// taris.lua; saving reloads Hyprland. With bordertheme on, the border takes its colours
 // from the colour scheme (theme-border.conf, which Colours writes) instead of colors/inactive.
-// With gradient off the border is one colour: solid (empty: the first of colors).
+// With gradient off the border is one colour: solid (empty: the first of colors). opacity is the
+// windows' (percent), blur the blur behind windows, blursize and blurpasses the blur's strength
+// for everything blurred, shellblur the blur behind the shell's panels (Colours applies it).
 Singleton {
     id: root
 
@@ -33,15 +35,36 @@ Singleton {
             gapsin: "1",
             gapsout: "3",
             columns: "0",
-            floatnew: "0"
+            floatnew: "0",
+            opacity: "100",
+            blur: "1",
+            blursize: "6",
+            blurpasses: "2",
+            shellblur: "1"
         })
     property var style: Object.assign({}, defaults)
+    // window-style.conf has been read (or isn't there): style is the account's from now on
+    property bool styleRead
+    // kitty's background opacity, the windows' (taris.lua keeps kitty solid as a window, so only its
+    // background is see-through and its text stays sharp: /etc/xdg/kitty/kitty.conf includes this)
+    readonly property string kittyConf: `background_opacity ${Math.max(0.3, Math.min(1, (Number(style.opacity) || 100) / 100))}\n`
 
     function save(changes: var): void {
         style = Object.assign({}, style, changes);
         file.setText(Object.entries(style).map(([k, v]) => `${k}=${v}`).join("\n") + "\n");
         Hypr.reload();
     }
+
+    // Only once both files are read, and only when it changed: running kittys read their config
+    // again when it's written
+    function writeKittyConf(): void {
+        if (!styleRead || !kittyFile.read || kittyConf === kittyFile.current)
+            return;
+        kittyFile.current = kittyConf;
+        kittyFile.setText(kittyConf);
+    }
+
+    onKittyConfChanged: writeKittyConf()
 
     FileView {
         id: file
@@ -57,6 +80,32 @@ Singleton {
                     s[m[1]] = m[2];
             }
             root.style = s;
+            root.styleRead = true;
+            root.writeKittyConf();
         }
+        onLoadFailed: {
+            root.styleRead = true;
+            root.writeKittyConf();
+        }
+    }
+
+    FileView {
+        id: kittyFile
+
+        property bool read
+        property string current
+
+        path: `${Paths.state}/terminal/kitty.conf`
+        printErrors: false
+        onLoaded: {
+            current = text();
+            read = true;
+            root.writeKittyConf();
+        }
+        onLoadFailed: {
+            read = true;
+            root.writeKittyConf();
+        }
+        onSaved: Quickshell.execDetached(["pkill", "-USR1", "-x", "kitty"])
     }
 }

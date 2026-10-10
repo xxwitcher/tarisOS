@@ -80,7 +80,7 @@ sudo included), and says so. Don't retry a failing password: tell the user.
 | **tiny-dfr** | Touch Bar (MacBooks that have one) | `/etc/tiny-dfr/config.toml` |
 
 Default apps: kitty, Nautilus, Chromium, GNOME Text Editor, Neovim, imv (images), mpv (video),
-Evince (PDFs), swappy (screenshots). VS Code and Claude Code are installed the first time they're
+Evince (PDFs), swappy (screenshots), GitHub CLI (`gh`). VS Code and Claude Code are installed the first time they're
 opened (`code` and `claude` in a terminal offer it too).
 
 ## Packages and Updates
@@ -115,6 +115,12 @@ last 10 are kept. Factory reset (Settings > Security) brings back the system as 
 Changes apply to new terminal windows. Terminal colours come from Taris's colour scheme (see
 the taris skill), so don't hardcode colours there unless the user wants them fixed.
 
+kitty, the default terminal, reads TarisOS's settings from `/etc/xdg/kitty/kitty.conf` only while
+the account has no `~/.config/kitty/kitty.conf`. When creating one, start it with
+`include /etc/xdg/kitty/kitty.conf` so TarisOS's settings stay (without it, kitty reopens maximized
+over everything). Hyprland opens kitty floating and centred (`/usr/share/taris/hypr/hyprland.lua`);
+change that with a window rule in `user.lua`.
+
 ## Other Configs
 
 | App | Location |
@@ -124,6 +130,36 @@ the taris skill), so don't hardcode colours there unless the user wants them fix
 | git | `~/.config/git/config` |
 | Apps started at login | `~/.config/autostart/*.desktop` (the dock's Open at Login sets them) |
 | Default apps | `~/.config/mimeapps.list` (TarisOS's are in `/etc/xdg/mimeapps.list`) |
+
+## Safe Customization Patterns
+
+```bash
+# 1. Read the current config
+cat ~/.config/hypr/user.lua
+# 2. Back it up before changing it
+cp ~/.config/hypr/user.lua ~/.config/hypr/user.lua.bak.$(date +%s)
+# 3. Make the change with the Edit tool
+# 4. Apply and validate:
+#    Hyprland: reloads on save; validate with `hyprctl reload` and `hyprctl configerrors`
+#    Taris: ~/.config/taris/shell.json reloads on save; check `taris shell -l`
+#    Terminals: changes apply to new windows
+```
+
+## Resetting to Defaults -- ALWAYS SEEK USER CONFIRMATION BEFORE RUNNING
+
+When customizations go wrong, put the TarisOS defaults back only after the user says yes, and back
+up what is there first:
+
+```bash
+# Hyprland: the account's stub, which loads TarisOS's config (personal changes are in user.lua)
+cp ~/.config/hypr/hyprland.lua ~/.config/hypr/hyprland.lua.bak.$(date +%s)
+cp /etc/skel/.config/hypr/hyprland.lua ~/.config/hypr/hyprland.lua
+# Taris: move a broken shell.json aside and the defaults apply
+mv ~/.config/taris/shell.json ~/.config/taris/shell.json.bak.$(date +%s)
+```
+
+Never run Settings > Security's factory reset for a user: it erases every account and file on the
+machine.
 
 ## System Information
 
@@ -165,6 +201,21 @@ authenticate `gh` yourself; hand the user the text instead. Include what happene
 expected, steps to reproduce, and the System Information above. `gh` cannot attach media: save a
 screenshot (`taris screenshot`) and give the user its path. End the report with a line naming
 the model and agent harness that wrote it ("Filed by <model> via <harness>.").
+
+## Example Requests
+
+- "Add a keybinding for SUPER+E to open yazi" -> Check `hyprctl binds`, then `hl.unbind` and
+  `hl.bind` in `~/.config/hypr/user.lua`, and say what SUPER+E did before
+- "Make the window gaps smaller" -> Settings > Appearance > Window style (or `gapsin`/`gapsout` in
+  `~/.config/taris/window-style.conf`, then `hyprctl reload`)
+- "Configure my external monitor" -> Settings > Displays, or `hl.monitor(...)` in `user.lua`
+- "Change my colours" -> `taris scheme set -n <scheme> -f <flavour>` (see the taris skill)
+- "Turn on night light" -> Settings > Displays > Night light
+- "Install <app>" -> the Store, or `sudo pacman -Syu --needed <app>` in a terminal
+- "Update everything" -> `/usr/lib/taris/update` in a terminal (Settings > General > Updates)
+- "Record my screen" -> `taris record` (again to stop; `-r` for a region)
+- "Report this bug to TarisOS" -> Gather the System Information and a capture of the problem, then
+  follow Reporting Bugs
 
 ## Out of Scope
 

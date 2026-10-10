@@ -50,6 +50,14 @@ Region {
         intersection: Intersection.Subtract
     }
 
+    // So does a dialog (Settings, the Store, the file picker, the terminal): nothing behind it can
+    // be clicked while it's open, and a click outside it closes it (ContentWindow)
+    Region {
+        width: root.panels.popouts.isDetached ? root.win.width : 0
+        height: root.panels.popouts.isDetached ? root.win.height : 0
+        intersection: Intersection.Subtract
+    }
+
     R {
         id: sessionRegion
 

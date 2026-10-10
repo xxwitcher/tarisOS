@@ -14,6 +14,10 @@ namespace taris::config {
 
 using Qt::StringLiterals::operator""_s;
 
+// The interface's size at an interface scale of 1 (Settings > Colours: fonts, padding, spacing and
+// rounding): TarisOS's standard look is what a scale of 0.95 was, so 1 is that
+inline constexpr qreal k_interfaceBaseScale = 0.95;
+
 // Forward declare token types from tokens.hpp
 class RoundingTokens;
 class SpacingTokens;

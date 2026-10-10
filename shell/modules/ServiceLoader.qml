@@ -16,6 +16,7 @@ Scope {
         Players;
         Brightness;
         Weather.reload();
+        AgentTerminal; // Writes the shell's terminal colours (its terminal only starts when used)
 
         if (GlobalConfig.utilities.vpn.enabled)
             VPN;

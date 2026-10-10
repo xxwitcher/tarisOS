@@ -135,8 +135,10 @@ Singleton {
                     return;
                 }
                 list.screenState.launcher = false;
-                // pacman asks for the password and to confirm in the terminal
-                ShellState.componentsForActive()?.panels?.popouts.showTerminal(Tr.tr("Installing %1").arg(pkg.name), `sudo pacman -S --needed ${pkg.name}`);
+                // pacman asks for the password and to confirm in the terminal. With the system's
+                // pending updates: from outdated package lists the install fails (the old files are
+                // gone from the mirror), and refreshing them alone (-Sy) is a partial upgrade
+                ShellState.componentsForActive()?.panels?.popouts.showTerminal(Tr.tr("Installing %1").arg(pkg.name), `sudo pacman -Syu --needed ${pkg.name}`);
             }
         };
     }

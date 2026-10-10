@@ -3,6 +3,7 @@
 
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -11,10 +12,25 @@ import qs.components.misc
 import qs.services
 
 Scope {
+    id: scope
+
+    function start(clipboardOnly: bool): void {
+        root.closing = false;
+        root.clipboardOnly = clipboardOnly;
+        root.activeAsync = true;
+    }
+
+    // From the moment it's asked for until it's gone: the shell's focus grabs let go, so the click
+    // that picks the area doesn't close the panel or settings being shot
+    Binding {
+        target: ShellState
+        property: "picking"
+        value: root.loading || root.active
+    }
+
     LazyLoader {
         id: root
 
-        property bool freeze
         property bool closing
         property bool clipboardOnly
 
@@ -50,33 +66,23 @@ Scope {
         }
     }
 
+    // The screen always freezes while picking: the Freeze names stay for the binds and scripts that
+    // use them (taris screenshot -r -f)
     IpcHandler {
         function open(): void {
-            root.freeze = false;
-            root.closing = false;
-            root.clipboardOnly = false;
-            root.activeAsync = true;
+            scope.start(false);
         }
 
         function openFreeze(): void {
-            root.freeze = true;
-            root.closing = false;
-            root.clipboardOnly = false;
-            root.activeAsync = true;
+            scope.start(false);
         }
 
         function openClip(): void {
-            root.freeze = false;
-            root.closing = false;
-            root.clipboardOnly = true;
-            root.activeAsync = true;
+            scope.start(true);
         }
 
         function openFreezeClip(): void {
-            root.freeze = true;
-            root.closing = false;
-            root.clipboardOnly = true;
-            root.activeAsync = true;
+            scope.start(true);
         }
 
         target: "picker"
@@ -87,25 +93,15 @@ Scope {
         // qmllint enable unresolved-type
         name: "screenshot"
         description: "Open screenshot tool"
-        onPressed: {
-            root.freeze = false;
-            root.closing = false;
-            root.clipboardOnly = false;
-            root.activeAsync = true;
-        }
+        onPressed: scope.start(false)
     }
 
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
         name: "screenshotFreeze"
-        description: "Open screenshot tool (freeze mode)"
-        onPressed: {
-            root.freeze = true;
-            root.closing = false;
-            root.clipboardOnly = false;
-            root.activeAsync = true;
-        }
+        description: "Open screenshot tool"
+        onPressed: scope.start(false)
     }
 
     // qmllint disable unresolved-type
@@ -113,24 +109,14 @@ Scope {
         // qmllint enable unresolved-type
         name: "screenshotClip"
         description: "Open screenshot tool (clipboard)"
-        onPressed: {
-            root.freeze = false;
-            root.closing = false;
-            root.clipboardOnly = true;
-            root.activeAsync = true;
-        }
+        onPressed: scope.start(true)
     }
 
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
         name: "screenshotFreezeClip"
-        description: "Open screenshot tool (freeze mode, clipboard)"
-        onPressed: {
-            root.freeze = true;
-            root.closing = false;
-            root.clipboardOnly = true;
-            root.activeAsync = true;
-        }
+        description: "Open screenshot tool (clipboard)"
+        onPressed: scope.start(true)
     }
 }

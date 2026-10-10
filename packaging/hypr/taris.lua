@@ -28,7 +28,7 @@ hl.gesture({ fingers = 3, direction = "down", action = function()
 end })
 
 -- Window style (Settings > Window style writes window-style.conf: key=value lines)
-local style = { gradient = "0", bordertheme = "1", colors = "c4b5fd a855f7 da70d6", solid = "", inactive = "5b3a7a", fade = "1", swipe = "1", roundingon = "1", rounding = "60", bordersize = "1", gapsin = "1", gapsout = "3", columns = "0", floatnew = "0" }
+local style = { gradient = "0", bordertheme = "1", colors = "c4b5fd a855f7 da70d6", solid = "", inactive = "5b3a7a", fade = "1", swipe = "1", roundingon = "1", rounding = "60", bordersize = "1", gapsin = "1", gapsout = "3", columns = "0", floatnew = "0", opacity = "100", blur = "1", blursize = "6", blurpasses = "2", shellblur = "1" }
 local function read_conf(path, into)
   local f = io.open(path)
   if not f then return end
@@ -284,3 +284,31 @@ hl.config({ general = {
   gaps_in = tonumber(style.gapsin) or 1,
   gaps_out = tonumber(style.gapsout) or 3,
 } })
+
+-- Windows' opacity and the blur behind them, from the Window style page, after hypr-settings.lua
+-- too. The blur's size and passes are Hyprland's one setting for everything it blurs, the shell's
+-- panels included (their layer rule is the shell's: Colours.qml, with shellblur). With window
+-- blur off, windows opt out by a rule, so the panels can still be blurred; with both off, nothing
+-- is.
+local opacity = math.max(0.3, math.min(1, (tonumber(style.opacity) or 100) / 100))
+hl.config({ decoration = {
+  active_opacity = opacity,
+  inactive_opacity = opacity,
+  blur = {
+    enabled = style.blur ~= "0" or style.shellblur ~= "0",
+    size = math.max(1, math.min(20, tonumber(style.blursize) or 6)),
+    passes = math.max(1, math.min(4, tonumber(style.blurpasses) or 2)),
+  },
+} })
+if style.blur == "0" then
+  hl.window_rule({ name = "taris-no-window-blur", match = { class = ".*" }, no_blur = true })
+end
+-- Apps whose content would fade with the window stay solid: the browser and the web apps, video,
+-- images, PDFs and VS Code. The terminal stays solid as a window too and makes only its own background
+-- see-through, at the same opacity (kitty's background_opacity, which the shell writes from this
+-- setting: services/WindowStyle.qml), so its text stays sharp.
+hl.window_rule({
+  name = "taris-solid-apps",
+  match = { class = "^(chromium|chrome-.*|mpv|imv|imv-dir|org\\.gnome\\.Evince|evince|code|com\\.microsoft\\.VSCode|kitty)$" },
+  opacity = "1.0 override",
+})

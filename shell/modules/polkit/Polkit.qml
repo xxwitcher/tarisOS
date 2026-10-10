@@ -23,6 +23,12 @@ import qs.services
 Scope {
     id: root
 
+    // The prompt's window only appears once the shell's focus grabs are gone (the Binding below
+    // turns them off): Hyprland gives no keyboard focus to a surface outside an active grab, and
+    // doesn't hand it over when the grab ends, so a prompt that appeared over an open panel or the
+    // settings could never be typed in
+    property bool grabsGone
+
     Binding {
         target: ShellState
         property: "authenticating"
@@ -32,14 +38,28 @@ Scope {
     PolkitAgent {
         id: agent
 
+        onIsActiveChanged: {
+            root.grabsGone = false;
+            if (isActive)
+                grabsGoneTimer.restart();
+            else
+                grabsGoneTimer.stop();
+        }
         onIsRegisteredChanged: {
             if (!isRegistered)
                 console.warn("Polkit: another authentication agent is registered; this one isn't in use");
         }
     }
 
+    Timer {
+        id: grabsGoneTimer
+
+        interval: 100
+        onTriggered: root.grabsGone = true
+    }
+
     LazyLoader {
-        active: agent.isActive && agent.flow !== null
+        active: agent.isActive && agent.flow !== null && root.grabsGone
 
         StyledWindow {
             id: win

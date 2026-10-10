@@ -45,7 +45,10 @@ is the login screen (the greeter, before anyone has logged in) and the first-boo
 │                           #   Reloads on save.
 ├── window-style.conf       # Window style page: key=value (gradient, bordertheme, colors, inactive,
 │                           #   bordersize, gapsin, gapsout, roundingon, rounding, fade, swipe,
-│                           #   titlebars, borderresize, columns, floatnew); run `hyprctl reload` after
+│                           #   titlebars, borderresize, columns, floatnew, opacity (windows', percent),
+│                           #   blur, blursize, blurpasses, shellblur (the panels')); run
+│                           #   `hyprctl reload` after. Chromium, web apps, mpv, imv, Evince, VS Code and
+│                           #   kitty stay solid; kitty's background follows `opacity` instead
 ├── theme-border.conf       # Generated: the scheme's border colours (used while bordertheme=1)
 ├── colour-overrides.json   # Colours page: per-scheme colour overrides {"name flavour mode": {colour: hex}}
 ├── hypr-settings.json      # Displays and Keyboard pages (monitors, input options) ...
@@ -147,7 +150,7 @@ Lock now: `taris-qs -c taris ipc call lock lock`.
 taris screenshot                  # Full screen
 taris screenshot -r               # Pick a region (-f freezes the screen while picking)
 taris record                      # Start/stop recording the screen (-r region, -s with sound)
-taris record -p                   # Pause/resume
+taris record -p                   # Pause/resume (not on Apple Silicon: wf-recorder can't pause)
 ```
 
 Recordings and their list are also in the quick actions panel (bottom right).

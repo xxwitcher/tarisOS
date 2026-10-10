@@ -8,7 +8,7 @@
 
 pkgname=taris-shell
 pkgver=1.0.0
-pkgrel=2
+pkgrel=3
 pkgdesc='The TarisOS desktop shell'
 arch=('aarch64')
 url='https://github.com/xxwitcher/tarisOS'
@@ -19,9 +19,10 @@ depends=(
     'glibc'
     'gcc-libs'
 
-    # Brightness
+    # Brightness, and night light (Settings > Displays)
     'ddcutil'
     'brightnessctl'
+    'hyprsunset'
 
     # Services
     'libcava'

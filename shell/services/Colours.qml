@@ -316,14 +316,17 @@ Singleton {
         Quickshell.execDetached(["taris", "scheme", "set", "--notify", "-m", mode]);
     }
 
+    // The shell's panels blurred behind while they're transparent, unless the blur behind them is
+    // turned off (Settings > Colours: shellblur in window-style.conf)
     function reloadHyprRules(): void {
+        const blur = transparency.enabled && WindowStyle.style.shellblur !== "0";
         let rule, trEnabled;
         if (Hypr.usingLua) {
             rule = `eval hl.layer_rule({ match = { namespace = "taris-drawers" }, %1 = %2 })`;
-            trEnabled = transparency.enabled;
+            trEnabled = blur;
         } else {
             rule = "keyword layerrule %1 %2, match:namespace taris-drawers";
-            trEnabled = transparency.enabled ? 1 : 0;
+            trEnabled = blur ? 1 : 0;
         }
         Hypr.extras.batchMessage([rule.arg("blur").arg(trEnabled), rule.arg("ignore_alpha").arg(Math.max(0, transparency.base - 0.03))]);
     }
@@ -345,6 +348,15 @@ Singleton {
         }
 
         target: Hypr
+    }
+
+    // window-style.conf read (after this started) or changed: the panels' blur may have too
+    Connections {
+        function onStyleChanged(): void {
+            root.requestReloadHyprRules();
+        }
+
+        target: WindowStyle
     }
 
     FileView {

@@ -42,7 +42,9 @@ Singleton {
     }
 
     // Taris's own messages (battery, charger, do not disturb, VPN...) come as toasts; they show
-    // as notifications instead, popping up top right and kept in the notification panel like any other
+    // as notifications instead, popping up top right and kept in the notification panel like any other.
+    // The plugin's toasts (Caps Lock, keyboard layout...) are marked for translation: translated
+    // and filled in here, as the toasts' own view did.
     function takeToasts(): void {
         const toasts = [];
         for (let i = 0; i < Toaster.toasts.length; i++)
@@ -52,8 +54,8 @@ Singleton {
         for (const toast of toasts.reverse()) {
             const comp = notifComp.createObject(root, {
                 popup: root.shouldShowPopup(),
-                summary: toast.title,
-                body: toast.message,
+                summary: Tr.trMarked(toast.title),
+                body: Tr.trMarked(toast.message),
                 appName: Tr.tr("System"),
                 materialIcon: toast.icon,
                 expireTimeout: toast.timeout,

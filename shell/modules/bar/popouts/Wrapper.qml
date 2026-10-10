@@ -86,10 +86,13 @@ Item {
     function showTerminal(title: string, command: string): void {
         terminalTitle = title;
         terminalCommand = command;
+        // Focus here first: the terminal made below takes it from here, and setting it afterwards
+        // would take it back from the terminal (typing, a sudo password included, then went
+        // nowhere, and Escape closed the overlay)
+        focus = true;
         setAnims(true);
         detachedMode = "terminal";
         setAnims(false);
-        focus = true;
     }
 
     function showFileDialog(dialog: var): void {
@@ -154,9 +157,9 @@ Item {
         // overlay itself (clicking its colour picker drops it)
         property bool regrabbing
 
-        // Off while a password prompt is up (ShellState.authenticating): it gets the clicks and the
-        // keyboard, and the overlay stays open under it
-        active: root.isDetached && !regrabbing && !ShellState.authenticating
+        // Off while a password prompt or the screenshot area picker is up (ShellState.grabsReleased):
+        // it gets the clicks and the keyboard, and the overlay stays open under it
+        active: root.isDetached && !regrabbing && !ShellState.grabsReleased
         windows: [QsWindow.window]
         onCleared: {
             if (Hypr.reloading() || detachedHover.hovered || fileDialogHover.hovered || terminalHover.hovered || storeHover.hovered) {
@@ -253,6 +256,13 @@ Item {
                 Component.onCompleted: {
                     terminalSession.startShellProgram();
                     forceActiveFocus();
+                    // Again once whatever opened it is done (it may set the focus as it goes)
+                    Qt.callLater(() => terminal.forceActiveFocus());
+                }
+
+                // A click in it gives it the keyboard back
+                TapHandler {
+                    onTapped: terminal.forceActiveFocus()
                 }
             }
         }

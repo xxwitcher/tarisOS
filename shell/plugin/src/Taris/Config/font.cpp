@@ -264,7 +264,7 @@ void FontTokens::bindFont(AppearanceFont* font) {
 }
 
 void FontTokens::rebuildScale() {
-    const qreal s = m_font ? m_font->scale() : 1;
+    const qreal s = (m_font ? m_font->scale() : 1) * k_interfaceBaseScale;
     m_headline->setScale(s);
     m_title->setScale(s);
     m_body->setScale(s);

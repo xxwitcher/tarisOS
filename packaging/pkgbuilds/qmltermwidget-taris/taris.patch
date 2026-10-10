@@ -1,6 +1,25 @@
+diff -ruN a/lib/ColorScheme.cpp b/lib/ColorScheme.cpp
+--- a/lib/ColorScheme.cpp	2026-10-09 23:59:46.413506303 +0100
++++ b/lib/ColorScheme.cpp	2026-10-09 23:59:56.391779887 +0100
+@@ -637,6 +637,15 @@
+     if ( dirs.isEmpty() )
+         return QString();
+ 
++    // Taris: a scheme in any of the folders (the shell's own one is in a folder added by the
++    // plugin, not the first), the first folder's path when none has it
++    for (const QString& schemeDir : dirs)
++    {
++        const QString found(schemeDir + QLatin1Char('/') + name + QLatin1String(".colorscheme"));
++        if (QFile::exists(found))
++            return found;
++    }
++
+     const QString dir = dirs.first();
+     QString path(dir + QLatin1Char('/')+ name + QLatin1String(".colorscheme"));
+     if ( !path.isEmpty() )
 diff -ruN a/lib/Emulation.cpp b/lib/Emulation.cpp
---- a/lib/Emulation.cpp	2026-10-08 12:02:39.747252590 +0100
-+++ b/lib/Emulation.cpp	2026-10-08 12:02:39.768143735 +0100
+--- a/lib/Emulation.cpp	2026-10-09 23:59:46.413581468 +0100
++++ b/lib/Emulation.cpp	2026-10-09 23:59:46.422943131 +0100
 @@ -316,8 +316,21 @@
      return _currentScreen->getLines() + _currentScreen->getHistLines();
  }
@@ -24,8 +43,8 @@ diff -ruN a/lib/Emulation.cpp b/lib/Emulation.cpp
      _bulkTimer2.stop();
  
 diff -ruN a/lib/Emulation.h b/lib/Emulation.h
---- a/lib/Emulation.h	2026-10-08 12:02:39.747274966 +0100
-+++ b/lib/Emulation.h	2026-10-08 12:02:39.768087735 +0100
+--- a/lib/Emulation.h	2026-10-09 23:59:46.413599759 +0100
++++ b/lib/Emulation.h	2026-10-09 23:59:46.423132419 +0100
 @@ -30,6 +30,7 @@
  #include <QKeyEvent>
  //#include <QPointer>
@@ -44,8 +63,8 @@ diff -ruN a/lib/Emulation.h b/lib/Emulation.h
  };
  
 diff -ruN a/lib/TerminalDisplay.cpp b/lib/TerminalDisplay.cpp
---- a/lib/TerminalDisplay.cpp	2026-10-08 12:02:39.748046219 +0100
-+++ b/lib/TerminalDisplay.cpp	2026-10-08 12:02:39.768361736 +0100
+--- a/lib/TerminalDisplay.cpp	2026-10-09 23:59:46.414492035 +0100
++++ b/lib/TerminalDisplay.cpp	2026-10-09 23:59:46.423591702 +0100
 @@ -3943,7 +3943,15 @@
  void TerminalDisplay::itemChange(ItemChange change, const ItemChangeData & value)
  {
@@ -62,3 +81,26 @@ diff -ruN a/lib/TerminalDisplay.cpp b/lib/TerminalDisplay.cpp
          if (value.boolValue && _screenWindow) {
              if (this->columns() != _screenWindow->columnCount() ||
                  this->lines() != _screenWindow->lineCount()) {
+diff -ruN a/src/qmltermwidget_plugin.cpp b/src/qmltermwidget_plugin.cpp
+--- a/src/qmltermwidget_plugin.cpp	2026-10-09 23:59:46.418438754 +0100
++++ b/src/qmltermwidget_plugin.cpp	2026-10-09 23:59:56.391873677 +0100
+@@ -1,6 +1,7 @@
+ #include "qmltermwidget_plugin.h"
+ 
+ #include "TerminalDisplay.h"
++#include "tools.h"
+ #include "ksession.h"
+ 
+ #include <qqml.h>
+@@ -35,4 +36,11 @@
+         setenv("KB_LAYOUT_DIR",kbl.toUtf8().constData(),1);
+         setenv("COLORSCHEMES_DIR",cs.toUtf8().constData(),1);
+     }
++
++    // Taris: the shell writes its terminals' colours (Taris.colorscheme, from the colour scheme)
++    // to $XDG_STATE_HOME/taris/terminal, which every account has its own of
++    QString state = qEnvironmentVariable("XDG_STATE_HOME");
++    if (state.isEmpty())
++        state = QDir::homePath() + QLatin1String("/.local/state");
++    add_custom_color_scheme_dir(state + QLatin1String("/taris/terminal/"));
+ }

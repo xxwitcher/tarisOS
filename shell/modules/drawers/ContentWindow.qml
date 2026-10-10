@@ -117,8 +117,9 @@ StyledWindow {
         id: focusGrab
 
         active: {
-            // A password prompt is up (modules/polkit): it gets the clicks and the keyboard
-            if (ShellState.authenticating)
+            // A password prompt (modules/polkit) or the screenshot area picker is up: it gets the
+            // clicks and the keyboard
+            if (ShellState.grabsReleased)
                 return false;
             const s = root.screenState;
             const conf = root.contentItem.Config;
@@ -256,14 +257,16 @@ StyledWindow {
             topLeftRadius: radius
         }
 
+        // A bar popout's shape; a dialog's is drawn over the other panels instead (dialogBg)
         PanelBg {
             id: popoutBg
 
             // Extra width to prevent vertical movement deformation partially detaching panel from bar
             property real extraWidth: panels.popouts.isDetached ? 0 : 0.2
 
+            group: panels.popouts.isDetached ? null : blobGroup
             panel: panels.popoutsWrapper
-            deformAmount: panels.popouts.isDetached ? 0.05 : panels.popouts.hasCurrent ? 0.15 : 0.1
+            deformAmount: panels.popouts.hasCurrent ? 0.15 : 0.1
             x: panels.popoutsWrapper.x + panels.popouts.x + bar.implicitWidth - panels.popouts.width * extraWidth
             implicitWidth: panels.popouts.width * (1 + extraWidth)
 
@@ -332,7 +335,45 @@ StyledWindow {
                 matrix: utilsBg.deformMatrix
             }
             popouts.transform: Matrix4x4 {
-                matrix: popoutBg.deformMatrix
+                matrix: panels.popouts.isDetached ? dialogBg.deformMatrix : popoutBg.deformMatrix
+            }
+            // A dialog (Settings, the Store, the file picker, the terminal) is over every other
+            // panel: notifications, the OSD and the rest stay behind it
+            popoutsWrapper.z: panels.popouts.isDetached ? 2 : 0
+
+            // The dialog's shape, with its own shadow: above the other panels' shapes and contents,
+            // under the dialog's (it's in the panels' item, which starts after the bar and border)
+            Item {
+                x: -bar.implicitWidth
+                y: -root.borderThickness
+                z: 1
+                width: root.width
+                height: root.height
+                visible: panels.popouts.isDetached
+                opacity: root.surfaceColour.a
+                layer.enabled: visible
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    blurMax: 15
+                    shadowColor: Qt.alpha(Colours.palette.m3shadow, Math.max(0, root.shadowOpacity))
+                }
+
+                BlobGroup {
+                    id: dialogBlobGroup
+
+                    color: root.surfaceColour
+                    smoothing: root.contentItem.Config.border.smoothing
+                }
+
+                PanelBg {
+                    id: dialogBg
+
+                    group: panels.popouts.isDetached ? dialogBlobGroup : null
+                    panel: panels.popoutsWrapper
+                    deformAmount: 0.05
+                    x: panels.popoutsWrapper.x + panels.popouts.x + bar.implicitWidth
+                    implicitWidth: panels.popouts.width
+                }
             }
         }
 
@@ -347,6 +388,25 @@ StyledWindow {
             popouts: panels.popouts
 
             fullscreen: root.hasFullscreen
+        }
+
+        // While a dialog is open, nothing behind it takes clicks (Regions gives this window the
+        // whole screen then): a click anywhere outside it closes it and does nothing else. Clicks
+        // and scrolling inside it go on to it, and its open menus are above this.
+        MouseArea {
+            id: dialogOutside
+
+            function inDialog(x: real, y: real): bool {
+                return panels.popoutsWrapper.contains(panels.popoutsWrapper.mapFromItem(dialogOutside, x, y));
+            }
+
+            anchors.fill: parent
+            enabled: panels.popouts.isDetached
+            acceptedButtons: Qt.AllButtons
+
+            onPressed: mouse => mouse.accepted = !inDialog(mouse.x, mouse.y)
+            onClicked: panels.popouts.close("clicked outside")
+            onWheel: wheel => wheel.accepted = !inDialog(wheel.x, wheel.y)
         }
     }
 

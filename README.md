@@ -52,7 +52,7 @@ the machine stays quiet, cool and long-lasting on battery.
 - **Store**: apps from Arch Linux ARM, the TarisOS repository, Flathub and the AUR in one place.
   Browse, search, install, remove and update.
 - **Colours and themes**: colour schemes, per-scheme colour changes, saved themes, and a window
-  border that follows the theme. TarisOS starts with the Witcher theme.
+  border that follows the theme. TarisOS starts with the Taris theme.
 - **Coding agent**: a terminal with your coding agent in the dashboard (<kbd>SUPER</kbd> +
   <kbd>A</kbd>), Claude Code by default (installed the first time it's opened), with skills that
   teach agents about this system.
@@ -102,6 +102,7 @@ the machine stays quiet, cool and long-lasting on battery.
 | Screenshots | The shell's screenshot tool, swappy for editing |
 | VPN | NordVPN, in the shell's quick settings |
 | Apps | The Store: Flathub, the AUR (yay) and the repositories |
+| GitHub | GitHub CLI (`gh`) |
 
 Chinese, Japanese and Korean input and fonts are installed when you turn them on in Settings >
 General > Language & region.
@@ -160,7 +161,7 @@ To switch between macOS and TarisOS, hold the power button while the Mac starts 
 | <kbd>SUPER</kbd> + <kbd>A</kbd> | Coding agent |
 | <kbd>SUPER</kbd> + <kbd>V</kbd> | Clipboard history |
 | <kbd>SUPER</kbd> + <kbd>L</kbd> | Lock |
-| <kbd>SUPER</kbd> + <kbd>ESC</kbd> | Session menu (log out, restart, shut down) |
+| <kbd>SUPER</kbd> + <kbd>ESC</kbd> | Session menu (log out, shut down, sleep, restart) |
 | <kbd>PRINT</kbd> | Screenshot |
 | <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>R</kbd> | Record a part of the screen |
 | <kbd>CTRL</kbd> + <kbd>Q</kbd> or <kbd>SUPER</kbd> + <kbd>W</kbd> | Close the window |
@@ -171,6 +172,7 @@ To switch between macOS and TarisOS, hold the power button while the Mac starts 
 | <kbd>SUPER</kbd> + arrows | Move focus |
 | <kbd>SUPER</kbd> + <kbd>1</kbd>–<kbd>9</kbd> | Go to a workspace |
 | <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>1</kbd>–<kbd>9</kbd> | Move the window to a workspace |
+| <kbd>fn</kbd> twice | Switch input source |
 | 3-finger swipe left or right | Switch workspace |
 | 3-finger swipe up or down | Open or close the overview |
 
@@ -860,13 +862,13 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "icons": {
             "logout": "logout",
             "shutdown": "power_settings_new",
-            "hibernate": "downloading",
+            "hibernate": "bedtime",
             "reboot": "cached"
         },
         "commands": {
             "logout": ["logout"],
             "shutdown": ["poweroff"],
-            "hibernate": ["hibernate"],
+            "hibernate": ["suspendThenHibernate"],
             "reboot": ["reboot"]
         }
     },
@@ -974,10 +976,11 @@ Per-monitor token overrides are also available at
 | `packaging/pkgbuilds/` | Every TarisOS package: `taris` and its parts (`taris-hardware`, `taris-shell`, `taris-desktop`, `taris-login`, `taris-chromium`, `taris-snapshots`, `taris-firewall`, `taris-wallpapers`, `taris-keyring`) and the packages Arch Linux ARM doesn't have |
 | `packaging/hypr/` | The Hyprland config TarisOS ships |
 | `packaging/agents/` | Skills for coding agents |
-| `packaging/defaults/`, `packaging/wallpapers/` | The Witcher theme, the preinstalled web apps, the wallpapers |
+| `packaging/defaults/`, `packaging/wallpapers/` | The Taris theme, the preinstalled web apps, the wallpapers |
 | `packaging/titlebars/` | Builds the title bar plugin for the installed Hyprland |
 | `distro/` | Builds the package repository and the installer image |
 | `install.sh`, `install-hypr.sh`, `install-agent-skills.sh` | Install the shell and the desktop on an existing Asahi Linux install, for working on them |
+| `AGENTS.md`, `CLAUDE.md`, `agents/skills/` | Instructions for coding agents working on TarisOS itself |
 
 ## Credits
 

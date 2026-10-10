@@ -15,6 +15,12 @@ Singleton {
     // A password prompt (modules/polkit) is up: the shell's focus grabs let go meanwhile, so the
     // prompt gets every click and key
     property bool authenticating
+    // The screenshot area picker is up (modules/areapicker): the focus grabs let go meanwhile too,
+    // or the click that picks the area would count as a click away and close the panel being shot
+    property bool picking
+    // The shell's focus grabs (modules/drawers, the bar's popouts) are off: while a password is
+    // asked for or an area is picked
+    readonly property bool grabsReleased: authenticating || picking
 
     // A disabled sidebar never counts as open (it would silence notification popups for nothing)
     function anySidebarOpen(): bool {

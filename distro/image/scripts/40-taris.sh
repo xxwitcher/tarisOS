@@ -29,6 +29,7 @@ apps=(
 	nordvpn-bin            # VPN (its daemon starts on first use)
 	flatpak                # apps from Flathub (the Store)
 	yay base-devel git     # the AUR (the Store, >install)
+	github-cli             # GitHub from the terminal (gh)
 	xdg-user-dirs          # Documents, Downloads, Pictures…
 	noto-fonts noto-fonts-emoji
 	power-profiles-daemon

@@ -83,15 +83,11 @@ python3 -I "$here/shell/scripts/settings-index.py" || echo "warning: the setting
 # The shell itself, from this checkout's shell folder
 build_install taris-shell
 
-# The Agent tab's terminal colours: the shell writes them from Taris's scheme, but QMLTermWidget
-# only reads schemes from its own folder
-state="${XDG_STATE_HOME:-$HOME/.local/state}/taris"
-mkdir -p "$state"
+# The shell's terminal colours come from each account's own folder now (qmltermwidget-taris looks
+# there): the link older versions of this script put in QMLTermWidget's folder would come first
 for qml in /usr/lib/qt6/qml /usr/lib64/qt6/qml; do
-  if [[ -d $qml/QMLTermWidget/color-schemes ]]; then
-    sudo ln -sfn "$state/agent-terminal.colorscheme" "$qml/QMLTermWidget/color-schemes/Taris.colorscheme"
-    break
-  fi
+  link="$qml/QMLTermWidget/color-schemes/Taris.colorscheme"
+  [[ -L $link ]] && sudo rm -f "$link"
 done
 
 # SiliconMotion SM77x USB display adapters (vendored in packaging/smidriver/ from the Witcher's
@@ -130,9 +126,15 @@ install_smi_driver() {
 }
 install_smi_driver || echo "warning: the SMI USB display driver could not be set up (see above); the rest of TarisOS is fine" >&2
 
+# On TarisOS, taris-hardware already has the Touch Bar layout and fan control (below)
+has_hardware=0
+pacman -Q taris-hardware &>/dev/null && has_hardware=1
+
 # Touch Bar layout with media keys and a screenshot key (MacBooks running tiny-dfr; skipped
 # without it). On TarisOS it comes with taris-hardware.
-"$packaging/extras/install-touchbar.sh" || echo "warning: the Touch Bar layout could not be installed (see above)" >&2
+if ((!has_hardware)); then
+  "$packaging/extras/install-touchbar.sh" || echo "warning: the Touch Bar layout could not be installed (see above)" >&2
+fi
 
 # Fan control (the bar's fan popout): the fan driver, macsmc_hwmon, is built into the Asahi kernel
 # and only takes speeds with macsmc_hwmon.fan_control=1 on the kernel command line (in GRUB's
@@ -162,7 +164,9 @@ install_fan_control() {
   [[ $(cat /sys/module/macsmc_hwmon/parameters/fan_control 2>/dev/null) == Y ]] ||
     echo "==> Fan control is set up: reboot to set fan speeds (they're read-only until then)."
 }
-install_fan_control || echo "warning: fan control could not be set up (see above)" >&2
+if ((!has_hardware)); then
+  install_fan_control || echo "warning: fan control could not be set up (see above)" >&2
+fi
 
 # Hyprland and the desktop's packages; then TarisOS's desktop settings (taris-desktop: the
 # Hyprland config in /usr/share/taris, the portal's file picker, the title bar plugin built by its

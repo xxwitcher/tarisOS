@@ -62,13 +62,16 @@ Item {
             root.volume = Audio.volume;
         }
 
+        // The microphone's slider is optional: without it, there's nothing to show for its changes
         function onSourceMutedChanged(): void {
-            root.show();
+            if (root.Config.osd.enableMicrophone)
+                root.show();
             root.sourceMuted = Audio.sourceMuted;
         }
 
         function onSourceVolumeChanged(): void {
-            root.show();
+            if (root.Config.osd.enableMicrophone)
+                root.show();
             root.sourceVolume = Audio.sourceVolume;
         }
 

@@ -32,7 +32,7 @@ passwd -l root
 mkdir -p /var/lib/taris /etc/taris
 touch /var/lib/taris/setup-pending /etc/taris/factory
 
-# The greeter's look before anyone has logged in: a new account's (the Witcher theme, the first
+# The greeter's look before anyone has logged in: a new account's (the Taris theme, its
 # wallpaper). In a PID namespace of its own: applying a theme signals running apps (btop, cava)
 # to reload theirs, which would reach the build machine's.
 look=$(mktemp -d)
@@ -41,7 +41,7 @@ unshare --pid --fork --mount-proc env -i PATH=/usr/bin HOME="$look" XDG_CONFIG_H
 	/usr/lib/taris/user-defaults >/dev/null 2>&1 || true
 mkdir -p /var/lib/taris/greeter/state/taris/wallpaper
 [[ -f $look/.local/state/taris/scheme.json ]] && install -m644 "$look/.local/state/taris/scheme.json" /var/lib/taris/greeter/state/taris/scheme.json
-echo /usr/share/backgrounds/taris/1.webp >/var/lib/taris/greeter/state/taris/wallpaper/path.txt
+echo /usr/share/backgrounds/taris/18.webp >/var/lib/taris/greeter/state/taris/wallpaper/path.txt
 rm -rf "$look"
 chown -R root:wheel /var/lib/taris/greeter
 chmod -R g+w /var/lib/taris/greeter

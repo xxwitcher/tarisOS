@@ -251,6 +251,10 @@ PageBase {
                     label: Tr.tr("Nothing")
                 },
                 {
+                    value: "fn",
+                    label: Tr.tr("Double-tap Fn")
+                },
+                {
                     value: "grp:alts_toggle",
                     label: Tr.tr("Both Alt keys")
                 },
@@ -271,8 +275,15 @@ PageBase {
                     label: "Caps Lock"
                 }
             ]
-            current: root.optionIn(["grp:"])
-            onChosen: v => root.setOption(["grp:"], v)
+            // Double-tapping Fn is Hyprland's config (taris_fn_switch, on unless turned off), the
+            // others are keyboard options: one way at a time
+            current: root.optionIn(["grp:"]) || ((HyprSettings.taris.fn_switch ?? true) ? "fn" : "")
+            onChosen: v => {
+                HyprSettings.setTaris("fn_switch", v === "fn");
+                const option = v === "fn" ? "" : v;
+                if (option !== root.optionIn(["grp:"]))
+                    root.setOption(["grp:"], option);
+            }
         }
 
         // ---------- Special keys ----------
