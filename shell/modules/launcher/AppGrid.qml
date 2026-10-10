@@ -79,8 +79,13 @@ GridView {
                 label: Tr.tr("Remove %1").arg(entry.name),
                 icon: "delete_forever",
                 action: () => {
-                    Installer.remove(entry);
-                    root.screenState.launcher = false;
+                    // A stand-in is only hidden: uninstalling its entry would remove taris-desktop
+                    if (OnDemand.isPlaceholder(entry)) {
+                        Dock.removeStandIn(entry);
+                    } else {
+                        Installer.remove(entry);
+                        root.screenState.launcher = false;
+                    }
                 }
             },
             {

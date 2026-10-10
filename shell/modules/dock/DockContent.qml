@@ -318,6 +318,12 @@ RowLayout {
                     icon: "open_in_new",
                     action: () => Dock.launch(entry)
                 });
+                if (OnDemand.isPlaceholder(entry))
+                    rows.push({
+                        label: Tr.tr("Remove"),
+                        icon: "delete",
+                        action: () => Dock.removeStandIn(entry)
+                    });
             } else {
                 rows.push({
                     label: Tr.tr("New Window"),

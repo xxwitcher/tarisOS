@@ -40,23 +40,6 @@ QtObject {
             category: "connectivity",
             noFill: true
         },
-        // Notifications and sound
-        {
-            id: "services",
-            keywords: "services notifications toasts lyrics media players brightness",
-            label: Tr.tr("Services"),
-            icon: "build",
-            description: Tr.tr("Poll intervals, lyrics backend"),
-            category: "alerts"
-        },
-        {
-            id: "audio",
-            keywords: "sound volume speakers microphone mic input output headphones",
-            label: Tr.tr("Audio"),
-            icon: "volume_up",
-            description: Tr.tr("App volumes, sound devices"),
-            category: "alerts"
-        },
         // General, look, panels, displays and power
         {
             id: "general",
@@ -148,6 +131,23 @@ QtObject {
             description: Tr.tr("Power profile, idle, sleep, battery"),
             category: "system"
         },
+        // Notifications and sound
+        {
+            id: "services",
+            keywords: "services notifications toasts lyrics media players brightness",
+            label: Tr.tr("Services"),
+            icon: "build",
+            description: Tr.tr("Poll intervals, lyrics backend"),
+            category: "alerts"
+        },
+        {
+            id: "audio",
+            keywords: "sound volume speakers microphone mic input output headphones",
+            label: Tr.tr("Audio"),
+            icon: "volume_up",
+            description: Tr.tr("App volumes, sound devices"),
+            category: "alerts"
+        },
         // Security
         {
             id: "security",
@@ -195,7 +195,7 @@ QtObject {
     ]
 
     // The page settings open on when no page is asked for
-    readonly property string defaultPage: "appearance"
+    readonly property string defaultPage: "general"
 
     // Whether the sidebar has this page: a merged page only while consolidated, its members only
     // while not

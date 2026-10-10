@@ -17,8 +17,11 @@ esac
 
 command -v "$command" >/dev/null && exec "$command"
 
+# The terminal in the colour scheme's colours, as bash's own startup gives them (bash -c doesn't
+# read it, so the window stayed black)
 exec "${TERMINAL:-kitty}" -e bash -c '
 	package=$1 name=$2 command=$3
+	cat "${XDG_STATE_HOME:-$HOME/.local/state}/taris/sequences.txt" 2>/dev/null
 	printf "Installing %s…\n\n" "$name"
 	if sudo pacman -Syu --needed "$package"; then
 		setsid -f "$command" >/dev/null 2>&1

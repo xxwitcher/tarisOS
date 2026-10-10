@@ -8,7 +8,7 @@
 
 pkgname=taris-desktop
 pkgver=1.0.0
-pkgrel=5
+pkgrel=6
 pkgdesc='TarisOS: the Hyprland desktop, its defaults and the system name'
 arch=('any')
 url='https://github.com/xxwitcher/tarisOS'
@@ -46,7 +46,7 @@ optdepends=(
     'taris-wallpapers: the wallpaper collection'
     'chromium: the browser, and the web apps'
 )
-backup=('etc/xdg/kitty/kitty.conf' 'etc/xdg/mimeapps.list' 'etc/xdg/xdg-desktop-portal/hyprland-portals.conf' 'etc/default/grub.d/taris-name.cfg')
+backup=('etc/xdg/kitty/kitty.conf' 'etc/xdg/mimeapps.list' 'etc/xdg/xdg-desktop-portal/hyprland-portals.conf' 'etc/default/grub.d/taris-name.cfg' 'etc/mpv/mpv.conf')
 source=(
     'user-defaults'
     'name-system'
@@ -65,6 +65,7 @@ source=(
     'input-method'
     'taris-hyprbars.service'
     'kitty.conf'
+    'mpv.conf'
 )
 sha256sums=('3e86e8f02f09e317030ac5d675591c2c217059d7b45d2a8d3f566e87c46af381'
             '0c6982fcab9703ec3cc44de107f16c9ee37714c98099eb692760162317771196'
@@ -78,11 +79,12 @@ sha256sums=('3e86e8f02f09e317030ac5d675591c2c217059d7b45d2a8d3f566e87c46af381'
             '55396d5ac468d334b61ab88b56c1cc9ee55be6079d31632699f1fe605b82f296'
             'b838524eb391a1e2d39d2f65292f4afc301c24dcbde3ef69ee0e2473eea815c2'
             '7cc2e014004efdd4777c40c5c76ca288ac9c0c21c9f487b3d14b4d351a24f4a0'
-            '3d0b2068a317b8444a2a4cd0020b98d9700dfc022d9ec13df9322b3c01d3acfa'
+            '5f0d2c1e83139d54cd50c63f5a84e193b7a5d1b72bbfb04895f2fb0ff9e25fae'
             '02d5b7f27174c85436383ebcfcd02556cd09844b3cf8abbe6064e4066547b032'
             'a9c66b05ef588c6d37ac21ff2e6c8817e4b7a0f422477152a53c0f7d14deed02'
             '673fe188e0ae343fe66893459b9ead70fe107731676c0f0f57ab008a8568f2b9'
-            '4826f5eddf299b6e91037b0ea5d595cd9e4157150ee254745060925a2b8caa60')
+            '4826f5eddf299b6e91037b0ea5d595cd9e4157150ee254745060925a2b8caa60'
+            '046a528f71108501b65b4aa374ac084c8d0ed7d83aadcd8181ee193922bf7cce')
 
 # This repository's packaging folder (the Hyprland config, defaults, agent skills, title bars)
 _packaging="${TARIS_PACKAGING:-$startdir/../..}"
@@ -107,6 +109,7 @@ package() {
     install -Dm644 hyprland-portals.conf "$pkgdir/etc/xdg/xdg-desktop-portal/hyprland-portals.conf"
     install -Dm644 mimeapps.list "$pkgdir/etc/xdg/mimeapps.list"
     install -Dm644 kitty.conf "$pkgdir/etc/xdg/kitty/kitty.conf"
+    install -Dm644 mpv.conf "$pkgdir/etc/mpv/mpv.conf"
 
     install -Dm644 "$_packaging/defaults/taris-theme.json" "$share/defaults/taris-theme.json"
     install -Dm644 "$_packaging/defaults/webapps/list.tsv" "$share/webapps/list.tsv"

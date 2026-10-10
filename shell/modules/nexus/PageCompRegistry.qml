@@ -69,29 +69,6 @@ QtObject {
                 }
             }
         },
-        // Notifications and sound
-        Component {
-            // Services
-            StackPage {
-                Component {
-                    ServicesPage {}
-                }
-                Component {
-                    NotificationsPage {}
-                }
-            }
-        },
-        Component {
-            // Audio
-            StackPage {
-                Component {
-                    AudioPage {}
-                }
-                Component {
-                    AppVolumes {}
-                }
-            }
-        },
         // General, look, panels, displays and power
         Component {
             // General (merged: About, Updates, Language & region), with Updates' sub-page in the
@@ -236,6 +213,29 @@ QtObject {
             StackPage {
                 Component {
                     PowerPage {}
+                }
+            }
+        },
+        // Notifications and sound
+        Component {
+            // Services
+            StackPage {
+                Component {
+                    ServicesPage {}
+                }
+                Component {
+                    NotificationsPage {}
+                }
+            }
+        },
+        Component {
+            // Audio
+            StackPage {
+                Component {
+                    AudioPage {}
+                }
+                Component {
+                    AppVolumes {}
                 }
             }
         },

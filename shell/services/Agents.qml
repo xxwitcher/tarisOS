@@ -38,6 +38,9 @@ Singleton {
 
     // Usage records by agent id (what the collectors write)
     property var records: ({})
+    // The records are watched through their folder, which a watch can't follow until it exists: on
+    // a new account's first login the collector only makes it later, and its records went unseen
+    property bool usageDirReady
     readonly property var usage: records[defaultAgent] ?? null
 
     // Collectors only run once the tab has been shown (they scan transcripts)
@@ -185,13 +188,19 @@ Singleton {
         onTriggered: root.run(["--limits-only"], ids)
     }
 
+    Process {
+        command: ["mkdir", "-p", root.usageDir]
+        running: true
+        onExited: root.usageDirReady = true
+    }
+
     Instantiator {
         model: root.tracked
 
         FileView {
             required property string modelData
 
-            path: `${root.usageDir}/${modelData}.json`
+            path: root.usageDirReady ? `${root.usageDir}/${modelData}.json` : ""
             watchChanges: true
             printErrors: false
             onFileChanged: reload()

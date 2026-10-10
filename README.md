@@ -56,7 +56,7 @@ the machine stays quiet, cool and long-lasting on battery.
 - **Coding agent**: a terminal with your coding agent in the dashboard (<kbd>SUPER</kbd> +
   <kbd>A</kbd>), Claude Code by default (installed the first time it's opened), with skills that
   teach agents about this system.
-- **Web apps**: YouTube, Discord, Kivi and Spotify are ready to use. `>install` in the launcher adds
+- **Web apps**: YouTube, Discord and Spotify are ready to use. `>install` in the launcher adds
   any site as an app, or installs a package; `>uninstall` removes either.
 
 **The system**

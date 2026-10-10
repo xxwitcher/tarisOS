@@ -1,6 +1,6 @@
 diff -ruN a/lib/ColorScheme.cpp b/lib/ColorScheme.cpp
---- a/lib/ColorScheme.cpp	2026-10-09 23:59:46.413506303 +0100
-+++ b/lib/ColorScheme.cpp	2026-10-09 23:59:56.391779887 +0100
+--- a/lib/ColorScheme.cpp	2026-10-10 22:46:44.189900454 +0100
++++ b/lib/ColorScheme.cpp	2026-10-10 22:46:44.197614327 +0100
 @@ -637,6 +637,15 @@
      if ( dirs.isEmpty() )
          return QString();
@@ -18,8 +18,8 @@ diff -ruN a/lib/ColorScheme.cpp b/lib/ColorScheme.cpp
      QString path(dir + QLatin1Char('/')+ name + QLatin1String(".colorscheme"));
      if ( !path.isEmpty() )
 diff -ruN a/lib/Emulation.cpp b/lib/Emulation.cpp
---- a/lib/Emulation.cpp	2026-10-09 23:59:46.413581468 +0100
-+++ b/lib/Emulation.cpp	2026-10-09 23:59:46.422943131 +0100
+--- a/lib/Emulation.cpp	2026-10-10 22:46:44.189994952 +0100
++++ b/lib/Emulation.cpp	2026-10-10 22:46:44.197711991 +0100
 @@ -316,8 +316,21 @@
      return _currentScreen->getLines() + _currentScreen->getHistLines();
  }
@@ -43,8 +43,8 @@ diff -ruN a/lib/Emulation.cpp b/lib/Emulation.cpp
      _bulkTimer2.stop();
  
 diff -ruN a/lib/Emulation.h b/lib/Emulation.h
---- a/lib/Emulation.h	2026-10-09 23:59:46.413599759 +0100
-+++ b/lib/Emulation.h	2026-10-09 23:59:46.423132419 +0100
+--- a/lib/Emulation.h	2026-10-10 22:46:44.190019160 +0100
++++ b/lib/Emulation.h	2026-10-10 22:46:44.197785115 +0100
 @@ -30,6 +30,7 @@
  #include <QKeyEvent>
  //#include <QPointer>
@@ -63,9 +63,62 @@ diff -ruN a/lib/Emulation.h b/lib/Emulation.h
  };
  
 diff -ruN a/lib/TerminalDisplay.cpp b/lib/TerminalDisplay.cpp
---- a/lib/TerminalDisplay.cpp	2026-10-09 23:59:46.414492035 +0100
-+++ b/lib/TerminalDisplay.cpp	2026-10-09 23:59:46.423591702 +0100
-@@ -3943,7 +3943,15 @@
+--- a/lib/TerminalDisplay.cpp	2026-10-10 22:46:44.190771560 +0100
++++ b/lib/TerminalDisplay.cpp	2026-10-10 22:53:50.602598934 +0100
+@@ -233,6 +233,8 @@
+ {
+   QFontMetrics fm(font());
+   _fontHeight = fm.height() + _lineSpacing;
++  if (_scrollBar)
++    _scrollBar->setLineHeight(_fontHeight);
+ 
+   // waba TerminalDisplay 1.123:
+   // "Base character width on widest ASCII character. This prevents too wide
+@@ -441,6 +443,7 @@
+   // create scroll bar for scrolling output up and down
+   // set the scroll bar's slider to occupy the whole area of the scroll bar initially
+   _scrollBar = new ScrollBar();
++  _scrollBar->setLineHeight(_fontHeight);
+   // since the contrast with the terminal background may not be enough,
+   // the scrollbar should be auto-filled if not transient
+   if (!_scrollBar->isTransient())
+@@ -2914,14 +2917,31 @@
+   {
+     // terminal program wants notification of mouse activity
+ 
++    // A program that reads the mouse scrolls a few lines per wheel report, as for a wheel notch.
++    // A trackpad sends many small events per swipe: add them up and report once per three lines'
++    // height moved (once per notch for a wheel), rather than once per event, which raced
++    int reports = 0;
++    const int pixels = ev->pixelDelta().y();
++    if (pixels != 0) {
++        const int unit = qMax(1, 3 * _fontHeight);
++        _wheelPixels += pixels;
++        reports = _wheelPixels / unit;
++        _wheelPixels -= reports * unit;
++    } else {
++        _wheelAngle += ev->angleDelta().y();
++        reports = _wheelAngle / 120;
++        _wheelAngle -= reports * 120;
++    }
++
+     int charLine;
+     int charColumn;
+     getCharacterPosition( ev->position() , charLine , charColumn );
+ 
+-    emit mouseSignal( ev->angleDelta().y() > 0 ? 4 : 5,
+-                      charColumn + 1,
+-                      charLine + 1 +_scrollBar->value() -_scrollBar->maximum() ,
+-                      0);
++    for (int i = 0; i < abs(reports); i++)
++      emit mouseSignal( reports > 0 ? 4 : 5,
++                        charColumn + 1,
++                        charLine + 1 +_scrollBar->value() -_scrollBar->maximum() ,
++                        0);
+   }
+ }
+ 
+@@ -3943,7 +3963,15 @@
  void TerminalDisplay::itemChange(ItemChange change, const ItemChangeData & value)
  {
      switch (change) {
@@ -81,9 +134,97 @@ diff -ruN a/lib/TerminalDisplay.cpp b/lib/TerminalDisplay.cpp
          if (value.boolValue && _screenWindow) {
              if (this->columns() != _screenWindow->columnCount() ||
                  this->lines() != _screenWindow->lineCount()) {
+@@ -4007,34 +4035,46 @@
+ void ScrollBar::setAutoFillBackground(bool) {}
+ void ScrollBar::setAttribute(Qt::WidgetAttribute) {}
+ bool ScrollBar::underMouse() const { return false; }
++void ScrollBar::setLineHeight(int pixels)
++{
++    m_lineHeight = qMax(1, pixels);
++}
++
+ void ScrollBar::handleEvent(QEvent* event)
+ {
+     auto *wheel = dynamic_cast<QWheelEvent*>(event);
+     if (!wheel) {
+         return;
+     }
++    wheel->accept();
+ 
+-    // Prefer pixelDelta for smooth/trackpad scrolling, fall back to angleDelta
+-    int deltaY = wheel->pixelDelta().y();
+-    if (deltaY == 0) {
+-        deltaY = wheel->angleDelta().y();
++    // A trackpad sends many small pixel deltas per swipe and a high-resolution wheel many small
++    // angle deltas per notch: add them up and scroll a line per line height moved (a step per
++    // notch for a wheel), rather than at least a line per event, which raced through the
++    // scrollback
++    int stepCount = 0;
++    const int pixels = wheel->pixelDelta().y();
++    if (pixels != 0) {
++        m_pixelRemainder += pixels;
++        stepCount = m_pixelRemainder / m_lineHeight;
++        m_pixelRemainder -= stepCount * m_lineHeight;
++    } else {
++        m_angleRemainder += wheel->angleDelta().y();
++        stepCount = m_angleRemainder / 120; // 120 == 15 deg * 8
++        m_angleRemainder -= stepCount * 120;
+     }
+-    if (deltaY == 0) {
++    if (stepCount == 0) {
+         return;
+     }
+ 
+     // Qt uses positive delta for scrolling up (towards the user), which is a
+     // smaller scrollbar value.
+-    const int steps = deltaY / 120; // 120 == 15 deg * 8
+-    int stepCount = steps != 0 ? steps : (deltaY > 0 ? 1 : -1);
+-
+     int increment = m_singleStep * stepCount;
+     if (wheel->modifiers() & Qt::ControlModifier) {
+         increment = (m_pageStep ? m_pageStep : m_singleStep) * stepCount;
+     }
+ 
+     setValue(m_value - increment);
+-    wheel->accept();
+ }
+ 
+ //#include "TerminalDisplay.moc"
+diff -ruN a/lib/TerminalDisplay.h b/lib/TerminalDisplay.h
+--- a/lib/TerminalDisplay.h	2026-10-10 22:46:44.190824642 +0100
++++ b/lib/TerminalDisplay.h	2026-10-10 22:53:50.602772139 +0100
+@@ -898,7 +898,9 @@
+     bool    _columnSelectionMode;
+ 
+     QClipboard*  _clipboard;
+-    ScrollBar* _scrollBar;
++    ScrollBar* _scrollBar{nullptr};
++    int _wheelPixels{0};
++    int _wheelAngle{0};
+     QTermWidget::ScrollBarPosition _scrollbarLocation;
+     QString     _wordCharacters;
+     int         _bellMode;
+@@ -1045,6 +1047,7 @@
+     void setRange(int min, int max);
+     void setSingleStep(int step);
+     void setPageStep(int step);
++    void setLineHeight(int pixels);
+     void setValue(int value);
+     int value() const;
+     int minimum() const;
+@@ -1077,6 +1080,9 @@
+     int m_value{0};
+     int m_singleStep{1};
+     int m_pageStep{0};
++    int m_lineHeight{1};
++    int m_pixelRemainder{0};
++    int m_angleRemainder{0};
+     int m_width{0};
+     int m_height{0};
+     bool m_hidden{false};
 diff -ruN a/src/qmltermwidget_plugin.cpp b/src/qmltermwidget_plugin.cpp
---- a/src/qmltermwidget_plugin.cpp	2026-10-09 23:59:46.418438754 +0100
-+++ b/src/qmltermwidget_plugin.cpp	2026-10-09 23:59:56.391873677 +0100
+--- a/src/qmltermwidget_plugin.cpp	2026-10-10 22:46:44.193698996 +0100
++++ b/src/qmltermwidget_plugin.cpp	2026-10-10 22:46:44.198195564 +0100
 @@ -1,6 +1,7 @@
  #include "qmltermwidget_plugin.h"
  

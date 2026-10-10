@@ -13,7 +13,7 @@ here="$(cd "$(dirname "$0")" && pwd)"
 packaging="$here/packaging"
 pkgbuilds="$packaging/pkgbuilds"
 
-sudo pacman -S --needed vulkan-headers cli11 ninja cmake git aubio libqalculate \
+sudo pacman -S --needed vulkan-headers cli11 ninja cmake qt6-shadertools git aubio libqalculate \
   ttf-material-symbols-variable ttf-cascadia-code-nerd papirus-icon-theme swappy dart-sass cliphist fuzzel \
   python-build python-installer python-hatch python-hatch-vcs pybind11 meson autoconf-archive wf-recorder \
   hyprsunset adw-gtk-theme python-gobject jq pacman-contrib xdg-utils flatpak archlinux-appstream-data libjxl

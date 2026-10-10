@@ -20,8 +20,10 @@ export TERM=xterm-256color COLORTERM=truecolor
 mise_shims="${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims"
 [[ :$PATH: == *":$mise_shims:"* ]] || export PATH="$mise_shims:$PATH"
 
-# Agents refuse to remember trust for $HOME, so start in the work directory when there is one
-[[ $PWD == "$HOME" && -d $HOME/Work ]] && cd "$HOME/Work"
+# Agents refuse to remember trust for $HOME, so start in the Projects folder when there is one:
+# trust given there once is kept. xdg-user-dirs makes it at setup, named in the account's language
+projects_dir=$(xdg-user-dir PROJECTS)
+[[ $PWD == "$HOME" && $projects_dir != "$HOME" && -d $projects_dir ]] && cd "$projects_dir"
 
 wait_and_exit() {
   printf '\n%s\n' "$1"

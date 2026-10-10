@@ -28,7 +28,7 @@ hl.gesture({ fingers = 3, direction = "down", action = function()
 end })
 
 -- Window style (Settings > Window style writes window-style.conf: key=value lines)
-local style = { gradient = "0", bordertheme = "1", colors = "c4b5fd a855f7 da70d6", solid = "", inactive = "5b3a7a", fade = "1", swipe = "1", roundingon = "1", rounding = "60", bordersize = "1", gapsin = "1", gapsout = "3", columns = "0", floatnew = "0", opacity = "100", blur = "1", blursize = "12", blurpasses = "3", shellblur = "1" }
+local style = { gradient = "0", bordertheme = "1", colors = "c4b5fd a855f7 da70d6", solid = "", inactive = "5b3a7a", fade = "1", swipe = "1", roundingon = "1", rounding = "60", bordersize = "1", gapsin = "1", gapsout = "3", columns = "0", floatnew = "0", opacity = "80", blur = "1", blursize = "12", blurpasses = "3", shellblur = "1" }
 local function read_conf(path, into)
   local f = io.open(path)
   if not f then return end
@@ -60,6 +60,30 @@ if style.columns == "1" then
 end
 if style.floatnew == "1" then
   hl.window_rule({ match = { class = ".*" }, float = true })
+  -- A floating window opens at the size it asks for: a viewer at its picture's or video's full
+  -- size, a dialog at its saved one, often most of the screen. Larger than 65% x 70% of the
+  -- screen, it opens at that size, centred, as SUPER + T does; it can still be made larger by hand
+  -- (a max_size rule would forbid that). Errors go to $XDG_RUNTIME_DIR/taris-hypr.log.
+  local function fit_new_window(w)
+    if w == nil or not w.floating or (tonumber(w.fullscreen) or 0) ~= 0 or w.monitor == nil then return end
+    local m = w.monitor
+    local size_w, size_h = w.size[1] or w.size.x, w.size[2] or w.size.y
+    local max_w = math.floor(m.width / m.scale * 0.65)
+    local max_h = math.floor(m.height / m.scale * 0.7)
+    if size_w <= max_w and size_h <= max_h then return end
+    hl.dispatch(hl.dsp.window.resize({ x = math.min(size_w, max_w), y = math.min(size_h, max_h), window = w }))
+    hl.dispatch(hl.dsp.window.center({ window = w }))
+  end
+  hl.on("window.open", function(w)
+    local ok, err = pcall(fit_new_window, w)
+    if not ok then
+      local f = io.open((os.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/taris-hypr.log", "a")
+      if f then
+        f:write(os.date("%H:%M:%S "), "window.open: ", tostring(err), "\n")
+        f:close()
+      end
+    end
+  end)
 end
 
 -- File pickers and other dialogs open like Taris's settings: centred above everything, the
@@ -290,7 +314,7 @@ hl.config({ general = {
 -- panels included (their layer rule is the shell's: Colours.qml, with shellblur). With window
 -- blur off, windows opt out by a rule, so the panels can still be blurred; with both off, nothing
 -- is.
-local opacity = math.max(0.3, math.min(1, (tonumber(style.opacity) or 100) / 100))
+local opacity = math.max(0.3, math.min(1, (tonumber(style.opacity) or 80) / 100))
 hl.config({ decoration = {
   active_opacity = opacity,
   inactive_opacity = opacity,

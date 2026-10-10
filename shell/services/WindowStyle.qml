@@ -36,7 +36,7 @@ Singleton {
             gapsout: "3",
             columns: "0",
             floatnew: "0",
-            opacity: "100",
+            opacity: "80",
             blur: "1",
             blursize: "12",
             blurpasses: "3",
@@ -47,7 +47,7 @@ Singleton {
     property bool styleRead
     // kitty's background opacity, the windows' (taris.lua keeps kitty solid as a window, so only its
     // background is see-through and its text stays sharp: /etc/xdg/kitty/kitty.conf includes this)
-    readonly property string kittyConf: `background_opacity ${Math.max(0.3, Math.min(1, (Number(style.opacity) || 100) / 100))}\n`
+    readonly property string kittyConf: `background_opacity ${Math.max(0.3, Math.min(1, (Number(style.opacity) || 80) / 100))}\n`
 
     function save(changes: var): void {
         style = Object.assign({}, style, changes);

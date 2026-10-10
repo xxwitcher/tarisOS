@@ -6,6 +6,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Taris.Config
 import qs.services
 import qs.utils
 import qs.modules.launcher.services as Launcher
@@ -136,7 +137,9 @@ Singleton {
         const entry = dragApp;
         if (entry) {
             // On the Trash, or (dragged out of the dock) anywhere off the dock: unpinned
-            if (overTrash || (dragFromDock && dropIndex < 0))
+            if (overTrash && OnDemand.isPlaceholder(entry))
+                removeStandIn(entry);
+            else if (overTrash || (dragFromDock && dropIndex < 0))
                 adapter.pinned = adapter.pinned.filter(p => entryFor(p)?.id !== entry.id);
             else if (dropIndex >= 0)
                 pinAt(entry.id, dropIndex);
@@ -205,6 +208,15 @@ Singleton {
 
     function togglePin(id: string): void {
         adapter.pinned = isPinned(id) ? adapter.pinned.filter(p => p !== id) : [...adapter.pinned, id];
+    }
+
+    // An app installed on first use that isn't wanted: out of the dock and hidden in the launcher
+    // (nothing is uninstalled; its entry belongs to taris-desktop)
+    function removeStandIn(entry: DesktopEntry): void {
+        adapter.pinned = adapter.pinned.filter(p => entryFor(p)?.id !== entry.id);
+        const hidden = GlobalConfig.launcher.hiddenApps;
+        if (!hidden.includes(entry.id))
+            GlobalConfig.launcher.hiddenApps = [...hidden, entry.id];
     }
 
     // Focus the app's next window (cycling), or launch it when it has none
