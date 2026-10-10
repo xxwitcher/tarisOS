@@ -3,6 +3,12 @@
 
 # TarisOS's extras for interactive bash shells (~/.bashrc loads this)
 
+# The terminal in the colour scheme's colours: the taris CLI writes them as escape sequences, and
+# sends them to the terminals already open whenever the scheme changes
+_taris_colours="${XDG_STATE_HOME:-$HOME/.local/state}/taris/sequences.txt"
+[[ -t 1 && -r $_taris_colours ]] && cat "$_taris_colours"
+unset _taris_colours
+
 # Coding agents installed from Settings > Apps > Agent (through mise)
 _taris_shims="${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims"
 [[ :$PATH: == *":$_taris_shims:"* ]] || PATH="$_taris_shims:$PATH"

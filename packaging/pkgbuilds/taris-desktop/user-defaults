@@ -47,6 +47,9 @@ json.dump(data, open(overrides_path, "w"), indent=4)
 PY
 	read -r scheme flavour mode < <(python3 -I -c 'import json, sys; t = json.load(open(sys.argv[1])); print(t["scheme"], t["flavour"], t["mode"])' "$theme") &&
 		taris scheme set -n "$scheme" -f "$flavour" -m "$mode" >/dev/null 2>&1 || true
+	# The theme's colours on the scheme now, not only once the shell runs: the greeter's and the
+	# setup screen's look (the image's) are copied from what this leaves, with no shell ever running
+	python3 -I /etc/xdg/quickshell/taris/assets/scheme-overrides.py >/dev/null 2>&1 || true
 fi
 
 # The preinstalled web apps (list.tsv: name, address, icon file), with the icons that come with

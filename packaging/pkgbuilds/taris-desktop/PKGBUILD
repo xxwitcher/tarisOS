@@ -8,7 +8,7 @@
 
 pkgname=taris-desktop
 pkgver=1.0.0
-pkgrel=3
+pkgrel=4
 pkgdesc='TarisOS: the Hyprland desktop, its defaults and the system name'
 arch=('any')
 url='https://github.com/xxwitcher/tarisOS'
@@ -45,7 +45,7 @@ optdepends=(
     'taris-wallpapers: the wallpaper collection'
     'chromium: the browser, and the web apps'
 )
-backup=('etc/xdg/mimeapps.list' 'etc/xdg/xdg-desktop-portal/hyprland-portals.conf' 'etc/default/grub.d/taris-name.cfg')
+backup=('etc/xdg/kitty/kitty.conf' 'etc/xdg/mimeapps.list' 'etc/xdg/xdg-desktop-portal/hyprland-portals.conf' 'etc/default/grub.d/taris-name.cfg')
 source=(
     'user-defaults'
     'name-system'
@@ -63,8 +63,9 @@ source=(
     'taris-install-code.desktop'
     'input-method'
     'taris-hyprbars.service'
+    'kitty.conf'
 )
-sha256sums=('88c9e9bc550754c81942da491691515ff97149051061a993709e4edf8a6f8e7f'
+sha256sums=('9054d757b85bac7545afc454f34e00228b1c2821e53abc925c5d488742e2c07d'
             '0c6982fcab9703ec3cc44de107f16c9ee37714c98099eb692760162317771196'
             '1ebe5b3dea2687e08cc9f975faff628728112035ead08dd6ff07a5f3261d38c1'
             '6c921e5153cd6471d96e7214ef5cd56b2c555113ad786352feefe43080c818dd'
@@ -73,13 +74,14 @@ sha256sums=('88c9e9bc550754c81942da491691515ff97149051061a993709e4edf8a6f8e7f'
             '673e49fc16c9d5de7c2c74ef6f95ee661d4a7c25828aebdc0c056ab8500a349b'
             '75c2b68f29d001d142062a744996dcf5f1bdaedafd98361236607415aaaf3427'
             '1a7f147c8ac153ec944b5cbb47ef3eebdbb7150d3aaec192568ec5cf9d8c62f6'
-            'acbe0b8c6d64a0106b405d1a889a6d7c29b43787b22b4c12fd82e3661441d9aa'
+            '55396d5ac468d334b61ab88b56c1cc9ee55be6079d31632699f1fe605b82f296'
             'b838524eb391a1e2d39d2f65292f4afc301c24dcbde3ef69ee0e2473eea815c2'
             '7cc2e014004efdd4777c40c5c76ca288ac9c0c21c9f487b3d14b4d351a24f4a0'
             '3d0b2068a317b8444a2a4cd0020b98d9700dfc022d9ec13df9322b3c01d3acfa'
             '02d5b7f27174c85436383ebcfcd02556cd09844b3cf8abbe6064e4066547b032'
             'a9c66b05ef588c6d37ac21ff2e6c8817e4b7a0f422477152a53c0f7d14deed02'
-            '673fe188e0ae343fe66893459b9ead70fe107731676c0f0f57ab008a8568f2b9')
+            '673fe188e0ae343fe66893459b9ead70fe107731676c0f0f57ab008a8568f2b9'
+            'd72300201a8da849bcb6785dff9096499b2faf1c62f2274e7912b0ce920988a3')
 
 # This repository's packaging folder (the Hyprland config, defaults, agent skills, title bars)
 _packaging="${TARIS_PACKAGING:-$startdir/../..}"
@@ -103,6 +105,7 @@ package() {
 
     install -Dm644 hyprland-portals.conf "$pkgdir/etc/xdg/xdg-desktop-portal/hyprland-portals.conf"
     install -Dm644 mimeapps.list "$pkgdir/etc/xdg/mimeapps.list"
+    install -Dm644 kitty.conf "$pkgdir/etc/xdg/kitty/kitty.conf"
 
     install -Dm644 "$_packaging/defaults/witcher-theme.json" "$share/defaults/witcher-theme.json"
     install -Dm644 "$_packaging/defaults/webapps/list.tsv" "$share/webapps/list.tsv"
