@@ -124,7 +124,15 @@ in_image() {
 	mount -t proc proc "$mnt/proc"
 	mount -t sysfs sys "$mnt/sys"
 	chroot "$mnt" "$@" || status=$?
-	umount "$mnt/sys" "$mnt/proc" "$mnt/dev"
+	# Something the command started can still be exiting: a few tries before giving up
+	local target tries
+	for target in "$mnt/sys" "$mnt/proc" "$mnt/dev"; do
+		for ((tries = 0; tries < 10; tries++)); do
+			umount "$target" 2>/dev/null && break
+			sleep 0.5
+		done
+		! mountpoint -q "$target" || die "$target is still busy"
+	done
 	return "$status"
 }
 
