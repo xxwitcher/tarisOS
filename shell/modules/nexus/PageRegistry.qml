@@ -116,7 +116,7 @@ QtObject {
         },
         {
             id: "panels",
-            keywords: "panels bar taskbar dashboard launcher sidebar notifications quick toggles osd clock workspaces tray",
+            keywords: "panels bar taskbar dashboard launcher notifications quick toggles osd clock workspaces tray",
             label: Tr.tr("Panels"),
             icon: "dock_to_bottom",
             description: Tr.tr("Dashboard, taskbar, launcher, sidebar"),
@@ -125,7 +125,7 @@ QtObject {
         {
             id: "dock",
             inPage: "panels",
-            inSub: 11,
+            inSub: 9,
             keywords: "dock pinned pin apps trash",
             label: Tr.tr("Dock"),
             icon: "dock_to_left",
@@ -155,6 +155,15 @@ QtObject {
             label: Tr.tr("Security"),
             icon: "lock",
             description: Tr.tr("Lock screen, fingerprint, password"),
+            category: "security"
+        },
+        // Backup & restore
+        {
+            id: "backup",
+            keywords: "backup backups restore snapshot snapshots factory reset erase",
+            label: Tr.tr("Backup & restore"),
+            icon: "settings_backup_restore",
+            description: Tr.tr("Backups, factory reset"),
             category: "security"
         },
         // Input

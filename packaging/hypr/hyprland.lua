@@ -135,6 +135,21 @@ for i = 1, 9 do
 end
 hl.bind("SUPER + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind("SUPER + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
+-- The special workspace, shown over whichever workspace you're on and hidden again: SUPER + S (or
+-- a click on the taskbar's current workspace), and SUPER + SHIFT + S moves the window there.
+-- Settings > Panels > Taskbar > Workspaces turns it off (taris_special_workspace, in
+-- hypr-settings.lua and live). Minimized windows have their own (taris.lua), never shown.
+_G.taris_special_workspace = true
+hl.bind("SUPER + S", function()
+  if _G.taris_special_workspace then
+    hl.dispatch(hl.dsp.workspace.toggle_special("special"))
+  end
+end, { description = "Special workspace" })
+hl.bind("SUPER + SHIFT + S", function()
+  if _G.taris_special_workspace then
+    hl.dispatch(hl.dsp.window.move({ workspace = "special:special", follow = false }))
+  end
+end, { description = "Move window to the special workspace" })
 
 -- Media and hardware keys (Taris shows the OSD)
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })

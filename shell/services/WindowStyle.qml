@@ -38,8 +38,8 @@ Singleton {
             floatnew: "0",
             opacity: "100",
             blur: "1",
-            blursize: "6",
-            blurpasses: "2",
+            blursize: "12",
+            blurpasses: "3",
             shellblur: "1"
         })
     property var style: Object.assign({}, defaults)

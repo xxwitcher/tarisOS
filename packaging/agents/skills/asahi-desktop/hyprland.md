@@ -60,6 +60,8 @@ TarisOS's default bindings:
 | `SUPER + J` | Toggle split |
 | `SUPER + arrows` | Move focus |
 | `SUPER + 1-9` / `SUPER + SHIFT + 1-9` | Go to / move window to workspace |
+| `SUPER + S` / `SUPER + SHIFT + S` | Show or hide the special workspace / move the window there (off on Settings > Panels > Taskbar > Workspaces) |
+| `fn` twice | Switch input source (Settings > Keyboard & trackpad picks another way) |
 | `SUPER + A` | Default coding agent in a terminal |
 | `SUPER + N` | Notification sidebar |
 | `SUPER + COMMA` | Settings |

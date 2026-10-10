@@ -37,11 +37,6 @@ PageBase {
     // The disk: the partition the root is on (for changing its password)
     property string encryptedPartition
 
-    // Factory reset: the system as installed is there to go back to (TarisOS images); armed
-    // after the first click, the second erases
-    property bool hasFactory
-    property bool resetArmed
-
     property Process _encryptionGet: Process {
         id: encryptionGet
 
@@ -110,26 +105,6 @@ PageBase {
             root.encryption = "pending";
             Quickshell.execDetached(["systemctl", "reboot"]);
         }
-    }
-
-    property Process _factoryCheck: Process {
-        running: true
-        command: ["test", "-e", "/etc/taris/factory"]
-        onExited: code => root.hasFactory = code === 0 // qmllint disable signal-handler-parameters
-    }
-
-    property Process _factoryReset: Process {
-        id: factoryReset
-
-        command: ["pkexec", "/usr/lib/taris/factory-reset"]
-        onExited: root.resetArmed = false
-    }
-
-    property Timer _resetDisarm: Timer {
-        id: resetDisarm
-
-        interval: 5000
-        onTriggered: root.resetArmed = false
     }
 
     property Process _sshdGet: Process {
@@ -297,29 +272,6 @@ PageBase {
             icon: "password"
             text: Tr.tr("Change password")
             onClicked: root.inTerminal("passwd")
-        }
-
-        SectionHeader {
-            visible: root.hasFactory
-            text: Tr.tr("Factory reset")
-        }
-
-        RowButton {
-            visible: root.hasFactory
-            first: true
-            last: true
-            icon: "restore"
-            text: root.resetArmed ? Tr.tr("Click again to erase everything and restart") : Tr.tr("Erase everything")
-            disabled: factoryReset.running
-            onClicked: {
-                if (root.resetArmed) {
-                    resetDisarm.stop();
-                    factoryReset.running = true;
-                } else {
-                    root.resetArmed = true;
-                    resetDisarm.restart();
-                }
-            }
         }
     }
 }

@@ -9,7 +9,7 @@ build() {
 
 help() {
     cat <<HELPEOF
-Factory reset for TarisOS: replaces the root with @factory, and the home folders with an empty
-@home, when Settings asked for it.
+Factory reset and backups for TarisOS: replaces the root with @factory and the home folders with
+an empty @home, or both with a backup's, when Settings asked for it.
 HELPEOF
 }

@@ -39,18 +39,6 @@ StyledRect {
         Loader {
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
-            active: Config.bar.clock.showIcon
-            visible: active
-
-            sourceComponent: MaterialIcon {
-                text: "calendar_month"
-                color: root.colour
-            }
-        }
-
-        Loader {
-            Layout.alignment: Qt.AlignHCenter
-            asynchronous: true
             active: Config.bar.clock.showDate
             visible: active
 

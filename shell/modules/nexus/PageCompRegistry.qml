@@ -190,18 +190,12 @@ QtObject {
                     LauncherPanel {}
                 }
                 Component {
-                    SidebarPanel {}
-                }
-                Component {
                     UtilitiesPanel {}
                 }
 
                 // Taskbar component sub-pages
                 Component {
                     BarWorkspaces {}
-                }
-                Component {
-                    BarActiveWindow {}
                 }
                 Component {
                     BarTray {}
@@ -251,6 +245,14 @@ QtObject {
             StackPage {
                 Component {
                     SecurityPage {}
+                }
+            }
+        },
+        Component {
+            // Backup & restore
+            StackPage {
+                Component {
+                    BackupPage {}
                 }
             }
         },

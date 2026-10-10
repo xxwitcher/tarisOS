@@ -10,10 +10,12 @@ import Quickshell.Services.SystemTray
 import Taris.Config
 import qs.components
 import qs.services
+import qs.modules.dashboard.dash as Dash
 
 Item {
     id: root
 
+    required property ShellScreen screen
     required property PopoutState popouts
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
@@ -130,6 +132,22 @@ Item {
         Popout {
             name: "lockstatus"
             sourceComponent: LockStatus {}
+        }
+
+        // The clock's: the dashboard's calendar, on this month (scrolling changes it)
+        Popout {
+            name: "calendar"
+            sourceComponent: Item {
+                implicitWidth: Tokens.sizes.bar.calendarWidth
+                implicitHeight: calendar.implicitHeight
+
+                Dash.Calendar {
+                    id: calendar
+
+                    screenState: ShellState.forScreen(root.screen)
+                    Component.onCompleted: screenState.dashboardDate = new Date()
+                }
+            }
         }
 
         Repeater {

@@ -39,6 +39,9 @@ Singleton {
     readonly property alias options: extras.options
     readonly property alias devices: extras.devices
 
+    // Where minimized windows go (taris.lua, the window buttons); the dock brings them back. It's
+    // never one of the special workspaces the user sees or opens.
+    readonly property string minimizedWorkspace: "special:minimized"
     property string lastSpecialWorkspace: ""
     // Until when a reload the shell asked for may still be under way (reload())
     property double reloadingUntil
@@ -64,12 +67,17 @@ Singleton {
         dispatch(usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
     }
 
+    // A special workspace of the user's (not the minimized windows')
+    function isUserSpecial(name: string): bool {
+        return name.startsWith("special:") && name !== minimizedWorkspace;
+    }
+
     function toggleSpecial(name: string): void {
         dispatch(usingLua ? `hl.dsp.workspace.toggle_special("${name}")` : `togglespecialworkspace ${name}`);
     }
 
     function cycleSpecialWorkspace(direction: string): void {
-        const openSpecials = workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0);
+        const openSpecials = workspaces.values.filter(w => isUserSpecial(w.name) && w.lastIpcObject.windows > 0);
 
         if (openSpecials.length === 0)
             return;
@@ -167,7 +175,7 @@ Singleton {
         function onLastIpcObjectChanged(): void {
             const specialName = root.focusedMonitor.lastIpcObject.specialWorkspace.name;
 
-            if (specialName && specialName.startsWith("special:")) {
+            if (specialName && root.isUserSpecial(specialName)) {
                 root.lastSpecialWorkspace = specialName;
             }
         }
@@ -218,7 +226,7 @@ Singleton {
         }
 
         function listSpecialWorkspaces(): string {
-            return root.workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0).map(w => w.name).join("\n");
+            return root.workspaces.values.filter(w => root.isUserSpecial(w.name) && w.lastIpcObject.windows > 0).map(w => w.name).join("\n");
         }
 
         target: "hypr"

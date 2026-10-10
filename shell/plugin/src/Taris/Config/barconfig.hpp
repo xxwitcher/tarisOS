@@ -40,8 +40,8 @@ class BarWorkspaces : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, occupiedBg, false)
     CONFIG_PROPERTY(bool, showUnoccupied, true)
     CONFIG_PROPERTY(bool, perMonitor, true)
-    CONFIG_PROPERTY(bool, showWindows, true)
-    CONFIG_PROPERTY(bool, showWindowsOnSpecialWorkspaces, true)
+    CONFIG_PROPERTY(bool, showWindows, false)
+    CONFIG_PROPERTY(bool, showWindowsOnSpecialWorkspaces, false)
     CONFIG_PROPERTY(int, maxWindowIcons, 2)
     CONFIG_PROPERTY(bool, activeTrail, true)
     CONFIG_ENUM_PROPERTY(BarWorkspaceDisplay, displayType, BarWorkspaceDisplay::Shapes)
@@ -101,9 +101,8 @@ class BarClock : public settings::ObjectNode {
     CONFIG_NODE(BarClock, settings::ObjectNode)
 
     CONFIG_PROPERTY(bool, background, false)
-    CONFIG_PROPERTY(bool, showDate, false)
-    CONFIG_PROPERTY(bool, showIcon, false)
-    CONFIG_PROPERTY(bool, showSeconds, false)
+    CONFIG_PROPERTY(bool, showDate, true)
+    CONFIG_PROPERTY(bool, showSeconds, true)
 };
 
 class BarConfig : public settings::ObjectNode {
@@ -120,7 +119,7 @@ class BarConfig : public settings::ObjectNode {
     CONFIG_SUBOBJECT(BarClock, clock)
     CONFIG_LIST(EntryList, statusIcons,
         DEFAULT_ARG({
-            LIST_ENTRY(lockStatus, true),
+            LIST_ENTRY(lockStatus, false),
             LIST_ENTRY(audio, false),
             LIST_ENTRY(microphone, false),
             LIST_ENTRY(kbLayout, false),

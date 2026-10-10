@@ -4,7 +4,8 @@
 
 # Factory reset (Settings, through pkexec): at the next boot, before the system starts, the root
 # (@) is replaced by a copy of @factory, the system exactly as it was installed, and the home
-# folders (@home) by an empty one; then the setup screen starts as on the first boot. This marks it
+# folders (@home) by an empty one, and the backups are deleted; then the setup screen starts as on
+# the first boot. This marks it
 # for the initramfs (the taris-reset hook) and restarts. --check: exit 0 when it's possible here.
 set -euo pipefail
 

@@ -6,6 +6,7 @@ pragma ComponentBehavior: Bound
 import QtQuick.Layouts
 import Taris.Config
 import Taris.I18n
+import qs.services
 import qs.modules.nexus.common
 
 PageBase {
@@ -69,6 +70,13 @@ PageBase {
             subtext: Tr.tr("Show icons of open windows on each workspace")
             checked: Config.bar.workspaces.showWindows
             onToggled: GlobalConfig.bar.workspaces.showWindows = checked
+        }
+
+        // SUPER + S, SUPER + SHIFT + S and a click on the current workspace (hyprland.lua)
+        ToggleRow {
+            text: Tr.tr("Special workspace")
+            checked: HyprSettings.taris.special_workspace ?? true
+            onToggled: HyprSettings.setTaris("special_workspace", checked)
         }
 
         ToggleRow {

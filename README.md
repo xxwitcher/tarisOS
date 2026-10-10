@@ -67,8 +67,10 @@ the machine stays quiet, cool and long-lasting on battery.
   desktop.
 - **Disk encryption**: turn it on from Settings > Security at any time. The Mac restarts once and
   encrypts the disk in place.
-- **Snapshots and factory reset**: a snapshot is taken before every package change (the last 10
-  are kept), and Settings > Security can bring the system back to exactly how it was installed.
+- **Backups and factory reset**: Settings > Backup & restore backs up the whole system (apps,
+  settings and every account's files) now or on a schedule, restores any backup, and can bring the
+  system back to exactly how it was installed. A snapshot of the system is also taken before every
+  package change (the last 10 are kept).
 - **Updates in one place**: Settings > General > Updates updates the system, the TarisOS packages,
   AUR apps and Flatpak apps together.
 - **Account protection**: an account locks for 10 minutes after 10 wrong passwords, and every
@@ -172,6 +174,8 @@ To switch between macOS and TarisOS, hold the power button while the Mac starts 
 | <kbd>SUPER</kbd> + arrows | Move focus |
 | <kbd>SUPER</kbd> + <kbd>1</kbd>–<kbd>9</kbd> | Go to a workspace |
 | <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>1</kbd>–<kbd>9</kbd> | Move the window to a workspace |
+| <kbd>SUPER</kbd> + <kbd>S</kbd> | Show or hide the special workspace |
+| <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>S</kbd> | Move the window to the special workspace |
 | <kbd>fn</kbd> twice | Switch input source |
 | 3-finger swipe left or right | Switch workspace |
 | 3-finger swipe up or down | Open or close the overview |
@@ -192,17 +196,20 @@ From a terminal, TarisOS is Arch Linux ARM: `pacman`, `yay` and `flatpak` work a
 with `sudo pacman -Syu --needed <package>` (never `-Sy` alone), and update everything with
 `/usr/lib/taris/update`.
 
-### Security, encryption and factory reset
+### Security, encryption, backups and factory reset
 
-All in Settings > Security:
+- **Disk encryption** (Settings > Security): choose *Encrypt the disk*, enter your password, and the
+  Mac restarts. On the way back up it asks for a new disk password twice, encrypts the disk (it
+  shows how far it has got), and starts. From then on the disk password is your login.
+- **Backups** (Settings > Backup & restore): *Back up now*, or turn on automatic backups (every
+  day, week or month). A backup holds the whole system: apps, packages, settings and every
+  account's files. Up to 20 are kept; the oldest go first. *Restore* (click twice) restarts into
+  it: everything goes back to how it was then, files included.
+- **Factory reset** (Settings > Backup & restore): *Erase everything*, confirmed, restarts and
+  brings TarisOS back to how it was installed. Every account, file and backup on it is erased, and
+  the setup screen starts again.
 
-- **Disk encryption**: choose *Encrypt the disk*, enter your password, and the Mac restarts. On the
-  way back up it asks for a new disk password twice, encrypts the disk (it shows how far it has
-  got), and starts. From then on the disk password is your login.
-- **Factory reset**: *Erase everything* (click twice) restarts and brings TarisOS back to how it
-  was installed. Every account and file on it is erased, and the setup screen starts again.
-
-Snapshots taken before package changes are listed with `sudo snapper list`.
+Snapshots of the system taken before package changes are listed with `snapper list`.
 
 ### Wallpapers
 
@@ -509,8 +516,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "occupiedBg": false,
             "showUnoccupied": true,
             "perMonitor": true,
-            "showWindows": true,
-            "showWindowsOnSpecialWorkspaces": true,
+            "showWindows": false,
+            "showWindowsOnSpecialWorkspaces": false,
             "maxWindowIcons": 5,
             "activeTrail": false,
             "displayType": "shapes",
@@ -567,13 +574,13 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         },
         "clock": {
             "background": false,
-            "showDate": false,
-            "showIcon": false
+            "showDate": true,
+            "showSeconds": true
         },
         "statusIcons": [
             {
                 "id": "lockStatus",
-                "enabled": true
+                "enabled": false
             },
             {
                 "id": "audio",
@@ -652,6 +659,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "showMedia": true,
         "showPerformance": true,
         "showWeather": true,
+        "showClockSeconds": true,
         "mediaUpdateInterval": 500,
         "resourceUpdateInterval": 1000,
         "dragThreshold": 50,
@@ -926,7 +934,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             },
             {
                 "id": "gameMode",
-                "enabled": true
+                "enabled": false
             },
             {
                 "id": "dnd",

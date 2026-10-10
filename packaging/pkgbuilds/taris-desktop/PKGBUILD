@@ -22,6 +22,7 @@ depends=(
     'polkit'
     'glib2'
     'xdg-utils'
+    'xdg-user-dirs'
     'desktop-file-utils'
     'wl-clipboard'
     'cliphist'
@@ -65,7 +66,7 @@ source=(
     'taris-hyprbars.service'
     'kitty.conf'
 )
-sha256sums=('cff87064abf9f66f459330a43522640e55b8e6c8033e7d69e6163ae4da75e489'
+sha256sums=('3e86e8f02f09e317030ac5d675591c2c217059d7b45d2a8d3f566e87c46af381'
             '0c6982fcab9703ec3cc44de107f16c9ee37714c98099eb692760162317771196'
             '1ebe5b3dea2687e08cc9f975faff628728112035ead08dd6ff07a5f3261d38c1'
             '6c921e5153cd6471d96e7214ef5cd56b2c555113ad786352feefe43080c818dd'

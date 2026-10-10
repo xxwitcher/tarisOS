@@ -73,7 +73,7 @@ class UtilitiesConfig : public settings::ObjectNode {
             LIST_ENTRY(bluetooth, true),
             LIST_ENTRY(mic, true),
             LIST_ENTRY(settings, true),
-            LIST_ENTRY(gameMode, true),
+            LIST_ENTRY(gameMode, false),
             LIST_ENTRY(dnd, true),
             LIST_ENTRY(vpn, true), // Hidden anyway until a VPN provider is selected
         }))

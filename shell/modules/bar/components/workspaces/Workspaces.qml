@@ -20,7 +20,7 @@ StyledClippingRect {
     required property bool fullscreen
 
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
-    readonly property bool onSpecial: monitor?.lastIpcObject.specialWorkspace?.name !== ""
+    readonly property bool onSpecial: Hypr.isUserSpecial(monitor?.lastIpcObject.specialWorkspace?.name ?? "")
     readonly property int activeWsId: monitor.activeWorkspace?.id ?? 1
     readonly property int activeWsIdx: workspaceIndex(activeWsId)
     readonly property int shown: Math.max(1, Config.bar.workspaces.shown)
@@ -178,10 +178,12 @@ StyledClippingRect {
                 const ws = (workspaces.itemAt(event.x, event.y) as Workspace)?.ws;
                 if (!ws)
                     return;
+                // Clicking the workspace you're on shows the special workspace, unless it's off
+                // (Settings > Panels > Taskbar > Workspaces; Hyprland's config keeps that)
                 if (Hypr.activeWsId !== ws)
                     Hypr.focusWorkspace(ws);
                 else
-                    Hypr.toggleSpecial("special");
+                    Quickshell.execDetached(["hyprctl", "eval", 'if _G.taris_special_workspace ~= false then hl.dispatch(hl.dsp.workspace.toggle_special("special")) end']);
             }
         }
 

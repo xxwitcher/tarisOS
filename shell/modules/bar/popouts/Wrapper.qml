@@ -186,6 +186,7 @@ Item {
         anchors.fill: parent
 
         sourceComponent: Content {
+            screen: root.screen
             popouts: popoutState
         }
     }

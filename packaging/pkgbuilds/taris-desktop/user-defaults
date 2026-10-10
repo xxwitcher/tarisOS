@@ -2,10 +2,10 @@
 # Copyright (C) 2026 George Dobreff ("Witcher") and contributors
 # SPDX-License-Identifier: GPL-3.0-only
 
-# A new account's TarisOS defaults, in its home folder: the Taris colour theme, its
-# wallpaper and the wallpaper collection, the preinstalled web apps, swappy's settings, the agent
-# skills and bash's extras. Run as the account by the setup screen when it creates it, and at login
-# (--if-new: only once per account, for accounts added later).
+# A new account's TarisOS defaults, in its home folder: the Taris colour theme, its wallpaper and
+# the wallpaper collection, the standard folders, the preinstalled web apps, swappy's settings, the
+# agent skills and bash's extras. Run as the account by the setup screen when it creates it, and at
+# login (--if-new: only once per account, for accounts added later).
 set -u
 
 state="${XDG_STATE_HOME:-$HOME/.local/state}/taris"
@@ -16,6 +16,13 @@ share=/usr/share/taris
 
 [[ ${1:-} == --if-new && -e $marker ]] && exit 0
 mkdir -p "$state" "$config/taris" "$data"
+
+# The standard folders (Desktop, Documents, Downloads, Music, Pictures, Public, Videos...), named for
+# the account's language, and ~/.config/user-dirs.dirs, which apps read them from. No Templates: set
+# to the home folder, xdg-user-dirs leaves it out and doesn't make it again.
+xdg-user-dirs-update >/dev/null 2>&1 || true
+xdg-user-dirs-update --set TEMPLATES "$HOME" >/dev/null 2>&1 || true
+rmdir "$HOME/Templates" 2>/dev/null || true
 
 # The wallpapers, one collection in the wallpaper folder (a link: updates reach it), and the first
 # one on screen. Set before the colours: a fixed scheme isn't changed by it (--no-smart).
